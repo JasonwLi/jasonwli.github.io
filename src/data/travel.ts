@@ -44,8 +44,14 @@ export function countryName(cc: string): string {
   }
 }
 
+/** full-resolution original — used by the lightbox */
 export function photoUrl(_loc: TravelLocation, photo: TravelPhoto): string {
   return `${import.meta.env.BASE_URL}photos/${photo.file}`
+}
+
+/** 800px medium variant — what the gallery panel actually loads */
+export function photoMediumUrl(_loc: TravelLocation, photo: TravelPhoto): string {
+  return `${import.meta.env.BASE_URL}photos/${photo.file.replace(/\.jpg$/, '-m.jpg')}`
 }
 
 export const stats = {

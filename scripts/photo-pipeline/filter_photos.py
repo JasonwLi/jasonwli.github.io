@@ -266,6 +266,9 @@ for p in plan:
             im.thumbnail((MAX_DIM, MAX_DIM), Image.LANCZOS)
             out_name = f"{i+1}.jpg"
             im.save(f"{OUT}/{slug}/{out_name}", "JPEG", quality=82, optimize=True, progressive=True)
+            med = im.copy()
+            med.thumbnail((800, 800), Image.LANCZOS)
+            med.save(f"{OUT}/{slug}/{i+1}-m.jpg", "JPEG", quality=80, optimize=True, progressive=True)
             tiny = im.copy()
             tiny.thumbnail((28, 28), Image.LANCZOS)
             buf = io.BytesIO()

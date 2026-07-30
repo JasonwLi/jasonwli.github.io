@@ -6,7 +6,7 @@ import {
   fmtCoords,
   fmtDateRange,
   locations,
-  photoUrl,
+  photoMediumUrl,
   type TravelLocation,
 } from '../data/travel'
 import { useSite } from '../state/store'
@@ -171,12 +171,16 @@ function GalleryPanel({ loc }: { loc: TravelLocation }) {
               className="photo-blur"
             />
             <img
-              src={photoUrl(loc, p)}
+              src={photoMediumUrl(loc, p)}
               alt=""
-              loading={i < 2 ? 'eager' : 'lazy'}
+              loading={i < 3 ? 'eager' : 'lazy'}
               decoding="async"
               className="photo-full"
               onLoad={(e) => e.currentTarget.classList.add('is-loaded')}
+              ref={(el) => {
+                // cached images can complete before the load listener attaches
+                if (el?.complete && el.naturalWidth > 0) el.classList.add('is-loaded')
+              }}
             />
           </motion.button>
         ))}
