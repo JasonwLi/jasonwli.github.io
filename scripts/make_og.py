@@ -6,7 +6,8 @@ import os
 from fontTools.ttLib.woff2 import decompress
 from PIL import Image, ImageDraw, ImageFont
 
-BASE = "/private/tmp/claude-501/-Users-jasonli-dev/609d9fd3-c32a-476f-9147-b3fa5a85aced/scratchpad"
+# night-hero.png: a 1440px-wide screenshot of the hero (globe on the right, text-free there)
+BASE = os.environ.get("PIPELINE_BASE", os.path.expanduser("~/dev/personal-website/.pipeline"))
 NM = "/Users/jasonli/dev/personal-website/node_modules"
 OUT = "/Users/jasonli/dev/personal-website/public/og.png"
 
