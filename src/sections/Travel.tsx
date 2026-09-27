@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import {
@@ -7,6 +7,7 @@ import {
   fmtDateRange,
   locations,
   photoMediumUrl,
+  stats,
   type TravelLocation,
 } from '../data/travel'
 import { useSite } from '../state/store'
@@ -38,10 +39,29 @@ function ZoomControls() {
   )
 }
 
+/** chips grouped by country, countries in order of first visit */
+function useCountryGroups() {
+  return useMemo(() => {
+    const byCc = new Map<string, TravelLocation[]>()
+    for (const loc of locations) {
+      const list = byCc.get(loc.cc)
+      if (list) list.push(loc)
+      else byCc.set(loc.cc, [loc])
+    }
+    const groups = [...byCc.entries()].map(([cc, locs]) => ({
+      cc,
+      name: countryName(cc),
+      locs,
+    }))
+    return { groups, ordered: groups.flatMap((g) => g.locs) }
+  }, [])
+}
+
 function LocationIndex() {
   const active = useSite((s) => s.active)
   const setActive = useSite((s) => s.setActive)
   const listRef = useRef<HTMLDivElement>(null)
+  const { groups, ordered } = useCountryGroups()
   // roving tabindex: the chip strip is a single tab stop, arrows move within it
   const [focusIdx, setFocusIdx] = useState(0)
 
@@ -58,32 +78,43 @@ function LocationIndex() {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return
     e.preventDefault()
     const next =
-      (focusIdx + (e.key === 'ArrowRight' ? 1 : -1) + locations.length) %
-      locations.length
+      (focusIdx + (e.key === 'ArrowRight' ? 1 : -1) + ordered.length) % ordered.length
     setFocusIdx(next)
     listRef.current
-      ?.querySelector<HTMLElement>(`[data-slug="${locations[next].slug}"]`)
+      ?.querySelector<HTMLElement>(`[data-slug="${ordered[next].slug}"]`)
       ?.focus()
   }
 
   return (
     <nav className="loc-index" aria-label="Visited places">
       <div className="loc-strip" ref={listRef} data-interactive onKeyDown={onKeyDown}>
-        {locations.map((loc, i) => (
-          <button
-            key={loc.slug}
-            data-slug={loc.slug}
-            tabIndex={i === focusIdx ? 0 : -1}
-            aria-pressed={active?.slug === loc.slug}
-            className={`loc-chip${active?.slug === loc.slug ? ' is-active' : ''}${loc.photos.length === 0 ? ' is-empty' : ''}`}
-            onClick={() => {
-              setFocusIdx(i)
-              setActive(active?.slug === loc.slug ? null : loc)
-            }}
-          >
-            <span className="map-label">{loc.name}</span>
-            <span className="mono">{loc.cc}</span>
-          </button>
+        {groups.map((g) => (
+          <div className="loc-group" key={g.cc} role="group" aria-label={g.name}>
+            <span className="loc-country mono" aria-hidden="true">
+              {g.name}
+            </span>
+            <div className="loc-group-chips">
+              {g.locs.map((loc) => {
+                const i = ordered.indexOf(loc)
+                return (
+                  <button
+                    key={loc.slug}
+                    data-slug={loc.slug}
+                    tabIndex={i === focusIdx ? 0 : -1}
+                    aria-pressed={active?.slug === loc.slug}
+                    aria-label={`${loc.name}, ${g.name}`}
+                    className={`loc-chip${active?.slug === loc.slug ? ' is-active' : ''}${loc.photos.length === 0 ? ' is-empty' : ''}`}
+                    onClick={() => {
+                      setFocusIdx(i)
+                      setActive(active?.slug === loc.slug ? null : loc)
+                    }}
+                  >
+                    <span className="map-label">{loc.name}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
         ))}
       </div>
     </nav>
@@ -208,6 +239,10 @@ export function Travel() {
     <section id="travel" className="travel">
       <header className="travel-head prose">
         <h2>The globe</h2>
+        <p className="travel-stats mono">
+          {stats.places} places · {stats.countries} countries · {stats.photos} photographs ·{' '}
+          {stats.firstYear} — {stats.lastYear}
+        </p>
       </header>
 
       <ZoomControls />

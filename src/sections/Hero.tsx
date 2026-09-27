@@ -28,6 +28,15 @@ export function Hero({ reducedMotion }: { reducedMotion: boolean }) {
             </span>
           ))}
         </h1>
+        <motion.p
+          className="hero-sub"
+          initial={reducedMotion ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          Payments, FX and stablecoin infrastructure by day. A globe of every place
+          photographed in person.
+        </motion.p>
       </div>
       <motion.div
         className="scroll-cue"

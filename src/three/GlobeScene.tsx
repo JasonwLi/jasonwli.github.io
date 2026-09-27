@@ -146,6 +146,7 @@ function Rig({ reducedMotion }: { reducedMotion: boolean }) {
     contact: null,
   })
   const wasInTravel = useRef(false)
+  const enteredTravel = useRef(false)
   const earthRef = useRef<THREE.Mesh>(null)
 
   // arrival: the planet settles into place on first load
@@ -408,9 +409,11 @@ function Rig({ reducedMotion }: { reducedMotion: boolean }) {
       travelInGlobal = travelIn
       g.travelIn = travelIn
 
-      const wx = mobile ? 0 : vpW * 0.36
-      const wy = mobile ? -1.05 : 0.02
       const ws = mobile ? 0.42 : 0.5
+      // parked to the right of the work log, but never past the viewport edge
+      // (the disc plus its atmosphere must stay inside on narrow-aspect screens)
+      const wx = mobile ? 0 : Math.min(vpW * 0.36, vpW / 2 - ws * 1.3)
+      const wy = mobile ? -1.05 : 0.02
       const galleryOpen = !!useSite.getState().active
       const tx = mobile || !galleryOpen ? 0 : -vpW * 0.13
       const ty = mobile ? -0.12 : -0.04
@@ -428,18 +431,42 @@ function Rig({ reducedMotion }: { reducedMotion: boolean }) {
 
       // soften the globe behind the footer so contact text carries
       const footEl = els.contact
+      let footIn = 0
       if (footEl) {
         const footR = footEl.getBoundingClientRect()
-        const footIn = easeInOut(
+        footIn = easeInOut(
           THREE.MathUtils.clamp((vh * 0.75 - footR.top) / (vh * 0.55), 0, 1),
         )
         dim = THREE.MathUtils.lerp(dim, 0.5, footIn)
       }
 
+      // the zoom cluster is absolutely positioned inside the travel section; gate
+      // it here so it never rides up over the site nav as the footer scrolls in
+      travelEl.classList.toggle('is-inview', travelIn > 0.5 && footIn < 0.35)
+
       // auto-close the gallery when *leaving* the travel section — edge-triggered,
       // so a gallery opened from the hero survives the glide down
       const { active: act, setActive } = useSite.getState()
       if (travelIn > 0.6) wasInTravel.current = true
+
+      // arriving at the globe: face the densest stretch of the route (the
+      // Mediterranean → Levant cluster) instead of whatever the idle spin left
+      // us on. Edge-triggered; skipped when a gallery already owns the view.
+      if (travelIn > 0.5 && !enteredTravel.current) {
+        enteredTravel.current = true
+        if (!act && !g.dragging) {
+          const f = facingAngles(33, 22)
+          g.targetYaw = nearestAngle(f.yaw, g.yaw)
+          g.targetPitch = f.pitch
+          g.lastInteraction = performance.now()
+          if (reducedMotion) {
+            g.yaw = g.targetYaw
+            g.pitch = g.targetPitch
+          }
+        }
+      } else if (travelIn < 0.2) {
+        enteredTravel.current = false
+      }
       if (act && wasInTravel.current && travelIn < 0.45) {
         setActive(null)
         wasInTravel.current = false

@@ -62,7 +62,7 @@ NAMES = {
     "toolooa-au": "Gladstone",
     "balmoral-au": "Brisbane",
     "wang-nuea-th": "Lampang",
-    "karak-city-jo": "Kerak",
+    "karak-city-jo": "Karak",
     "odawara-jp": "Hakone",
     "mesaria-gr": "Santorini",
     "nagoya-shi-jp": "Nagoya",
@@ -72,6 +72,13 @@ NAMES = {
     "san-isidro-es": "Tenerife",
     "san-isidro-pe": "Lima",
     "milano-it": "Milan",
+    "dhahab-eg": "Dahab",
+    "sao-paulo-br": "São Paulo",
+    "amstelveen-nl": "Amsterdam",
+    "serik-tr": "Belek",
+    "rawai-th": "Phuket",
+    "wushan-cn": "Guangzhou",
+    "guangsheng-cn": "Dujiangyan",
 }
 
 MERGE = {

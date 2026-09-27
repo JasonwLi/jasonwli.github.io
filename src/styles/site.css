@@ -82,15 +82,6 @@
   max-width: 34ch;
   pointer-events: auto;
 }
-.hero-now {
-  margin-top: 1.1rem;
-  font-size: 1.15rem;
-  color: var(--brass);
-  pointer-events: auto;
-}
-.hero-now .mono {
-  color: var(--muted);
-}
 
 .scroll-cue {
   position: absolute;
@@ -138,12 +129,6 @@
   font-weight: 740;
   letter-spacing: -0.024em;
 }
-.work-annot {
-  margin-top: 0.9rem;
-  font-size: clamp(1.15rem, 2vw, 1.4rem);
-  color: var(--brass-text);
-  max-width: 46ch;
-}
 
 .log {
   list-style: none;
@@ -187,49 +172,6 @@
   max-width: 62ch;
 }
 
-.work-extra {
-  margin-top: clamp(3rem, 7vh, 5rem);
-  border-top: 1px solid var(--line);
-  padding-top: 2.4rem;
-}
-.projects {
-  pointer-events: auto;
-}
-.projects-title {
-  font-size: 1.4rem;
-  color: var(--brass-text);
-  font-weight: 500;
-}
-.projects ul {
-  list-style: none;
-  margin-top: 1.4rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
-  gap: 1.4rem 3rem;
-}
-.projects li {
-  font-size: 0.95rem;
-  color: var(--muted);
-  max-width: 44ch;
-}
-.project-link {
-  font-weight: 600;
-  color: var(--ink);
-  background-image: linear-gradient(var(--brass), var(--brass));
-  background-repeat: no-repeat;
-  background-size: 0% 1px;
-  background-position: 0 100%;
-  padding-bottom: 2px;
-  transition: background-size 0.3s var(--ease-out-quart), color 0.2s;
-}
-a.project-link:hover {
-  color: var(--brass);
-  background-size: 100% 1px;
-}
-.edu {
-  margin-top: 2.2rem;
-}
-
 /* ————————————— travel ————————————— */
 
 .travel {
@@ -244,14 +186,9 @@ a.project-link:hover {
   pointer-events: auto;
   max-width: 30rem;
 }
-.travel-annot {
-  margin-top: 0.9rem;
-  font-size: clamp(1.15rem, 2vw, 1.35rem);
-  color: var(--brass-text);
-  max-width: 34ch;
-}
 .travel-stats {
   margin-top: 1rem;
+  font-size: 0.78rem;
 }
 
 .loc-index {
@@ -260,7 +197,8 @@ a.project-link:hover {
 }
 .loc-strip {
   display: flex;
-  gap: 0.4rem;
+  align-items: flex-start;
+  gap: 1.5rem;
   overflow-x: auto;
   padding: 0.6rem clamp(1.5rem, 6vw, 5.5rem);
   scrollbar-width: none;
@@ -275,12 +213,30 @@ a.project-link:hover {
 .loc-strip::-webkit-scrollbar {
   display: none;
 }
+.loc-group {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.loc-country {
+  padding-left: 0.95rem;
+  font-size: 0.64rem;
+  color: oklch(0.58 0.015 250);
+}
+/* two rows per country, filled column-first, so twice as many places fit on screen */
+.loc-group-chips {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(2, auto);
+  gap: 0 0.2rem;
+}
 .loc-chip {
   flex-shrink: 0;
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
-  padding: 0.5rem 0.95rem;
+  padding: 0.3rem 0.95rem;
   border: 1px solid transparent;
   border-radius: 2px;
   color: var(--muted);
@@ -291,10 +247,6 @@ a.project-link:hover {
 }
 .loc-chip .map-label {
   font-size: 1.08rem;
-}
-.loc-chip .mono {
-  font-size: 0.68rem;
-  color: oklch(0.66 0.015 250);
 }
 .loc-chip:hover {
   color: var(--ink);
@@ -317,6 +269,13 @@ a.project-link:hover {
   flex-direction: column;
   gap: 0.3rem;
   z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s var(--ease-out-quart);
+}
+.travel.is-inview .zoom-controls {
+  opacity: 1;
+  pointer-events: auto;
 }
 .zoom-controls button {
   min-width: 2.75rem;
@@ -521,7 +480,7 @@ a.project-link:hover {
 /* ————————————— footer ————————————— */
 
 .footer {
-  min-height: 64svh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -529,36 +488,6 @@ a.project-link:hover {
   gap: 1.3rem;
   text-align: center;
   padding: 4rem clamp(1.5rem, 6vw, 5.5rem) 3rem;
-}
-.footer-lead {
-  font-size: clamp(1.3rem, 2.4vw, 1.7rem);
-  color: var(--brass-text);
-}
-.footer-email {
-  font-size: clamp(1.5rem, 4.4vw, 2.7rem);
-  font-weight: 640;
-  letter-spacing: -0.02em;
-  background-image: linear-gradient(var(--brass), var(--brass));
-  background-repeat: no-repeat;
-  background-size: 0% 2px;
-  background-position: 50% 100%;
-  padding-bottom: 4px;
-  transition: background-size 0.35s var(--ease-out-quart), color 0.2s;
-}
-.footer-email:hover {
-  color: var(--brass);
-  background-size: 100% 2px;
-}
-.footer-links {
-  display: flex;
-  gap: 2rem;
-}
-.footer-links a {
-  color: var(--muted);
-  transition: color 0.18s;
-}
-.footer-links a:hover {
-  color: var(--brass);
 }
 .footer-fine {
   margin-top: 2.5rem;
@@ -582,13 +511,6 @@ a.project-link:hover {
 }
 
 /* ————————————— responsive ————————————— */
-
-@media (max-width: 640px) {
-  .hero-now .mono {
-    display: block;
-    margin-top: 0.35rem;
-  }
-}
 
 @media (max-width: 860px) {
   .log-row {
