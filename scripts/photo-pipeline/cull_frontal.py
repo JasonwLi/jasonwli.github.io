@@ -3,7 +3,7 @@ import json
 import os
 import sys
 
-sys.path.insert(0, "/private/tmp/claude-501/-Users-jasonli-dev/609d9fd3-c32a-476f-9147-b3fa5a85aced/scratchpad")
+sys.path.insert(0, os.environ.get("PIPELINE_BASE", os.path.expanduser("~/dev/personal-website/.pipeline")))
 os.environ.setdefault("NO_MAIN", "1")
 
 import Vision  # noqa: E402
@@ -11,7 +11,7 @@ from Foundation import NSURL  # noqa: E402
 from PIL import Image, ImageOps  # noqa: E402
 from ultralytics import YOLO  # noqa: E402
 
-BASE = "/private/tmp/claude-501/-Users-jasonli-dev/609d9fd3-c32a-476f-9147-b3fa5a85aced/scratchpad"
+BASE = os.environ.get("PIPELINE_BASE", os.path.expanduser("~/dev/personal-website/.pipeline"))
 PHOTOS = "/Users/jasonli/dev/personal-website/public/photos"
 _TMP = "/tmp/face_crop_check2.jpg"
 

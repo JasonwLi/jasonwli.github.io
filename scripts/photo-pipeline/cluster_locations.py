@@ -1,11 +1,12 @@
 """Cluster geo-tagged photos into visited locations (city scale) and reverse geocode."""
 import json
+import os
 import math
 from collections import defaultdict
 
 import reverse_geocoder as rg
 
-BASE = "/private/tmp/claude-501/-Users-jasonli-dev/609d9fd3-c32a-476f-9147-b3fa5a85aced/scratchpad"
+BASE = os.environ.get("PIPELINE_BASE", os.path.expanduser("~/dev/personal-website/.pipeline"))
 
 with open(f"{BASE}/photos_meta.json") as f:
     photos = json.load(f)

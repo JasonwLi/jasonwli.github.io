@@ -54,7 +54,7 @@ for p in candidates:
         "uti": p.uti,
         "ismissing": p.ismissing,
     })
-out = "/private/tmp/claude-501/-Users-jasonli-dev/609d9fd3-c32a-476f-9147-b3fa5a85aced/scratchpad/candidates.json"
+out = os.path.join(os.environ.get("PIPELINE_BASE", os.path.expanduser("~/dev/personal-website/.pipeline")), "candidates.json")
 with open(out, "w") as f:
     json.dump(rows, f, indent=1)
 print(f"wrote {len(rows)} candidates to {out}", file=sys.stderr)

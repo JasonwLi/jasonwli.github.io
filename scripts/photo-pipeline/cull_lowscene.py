@@ -5,7 +5,7 @@ import os
 import Vision
 from Foundation import NSURL
 
-BASE = "/private/tmp/claude-501/-Users-jasonli-dev/609d9fd3-c32a-476f-9147-b3fa5a85aced/scratchpad"
+BASE = os.environ.get("PIPELINE_BASE", os.path.expanduser("~/dev/personal-website/.pipeline"))
 PHOTOS = "/Users/jasonli/dev/personal-website/public/photos"
 CURATED = {"daly-city-us"}
 

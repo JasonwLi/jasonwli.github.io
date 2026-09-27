@@ -3,7 +3,7 @@ import json
 import os
 import subprocess
 
-BASE = "/private/tmp/claude-501/-Users-jasonli-dev/609d9fd3-c32a-476f-9147-b3fa5a85aced/scratchpad"
+BASE = os.environ.get("PIPELINE_BASE", os.path.expanduser("~/dev/personal-website/.pipeline"))
 EXPORTS = f"{BASE}/exports"
 THIN = 3
 WAVE2_N = 30  # total candidates incl. wave 1's 12

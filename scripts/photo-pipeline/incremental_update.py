@@ -9,7 +9,7 @@ import unicodedata
 
 import reverse_geocoder as rg
 
-BASE = "/private/tmp/claude-501/-Users-jasonli-dev/609d9fd3-c32a-476f-9147-b3fa5a85aced/scratchpad"
+BASE = os.environ.get("PIPELINE_BASE", os.path.expanduser("~/dev/personal-website/.pipeline"))
 EXPORTS = f"{BASE}/exports"
 CURATED = {"daly-city-us"}  # hand-picked; never auto-cleared
 

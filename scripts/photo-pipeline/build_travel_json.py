@@ -1,5 +1,6 @@
 """Merge export_plan + photos_manifest into the site's travel.json with clean display names."""
 import json
+import os
 import math
 from datetime import date
 
@@ -9,7 +10,7 @@ def haversine_km(a, b):
     h = math.sin((lat2 - lat1) / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin((lon2 - lon1) / 2) ** 2
     return 6371 * 2 * math.asin(math.sqrt(h))
 
-BASE = "/private/tmp/claude-501/-Users-jasonli-dev/609d9fd3-c32a-476f-9147-b3fa5a85aced/scratchpad"
+BASE = os.environ.get("PIPELINE_BASE", os.path.expanduser("~/dev/personal-website/.pipeline"))
 OUT = "/Users/jasonli/dev/personal-website/public/travel-data.json"
 
 # slug → display name (and optional country override)
@@ -79,6 +80,7 @@ NAMES = {
     "rawai-th": "Phuket",
     "wushan-cn": "Guangzhou",
     "guangsheng-cn": "Dujiangyan",
+    "mala-strana-cz": "Prague",
 }
 
 MERGE = {
@@ -121,7 +123,9 @@ for p in plan:
     loc["last"] = max(loc["last"], src["last"])
     for ph in photos:
         # file paths are stored relative to public/photos/
-        loc["photos"].append({**ph, "file": f"{slug}/{ph['file']}"})
+        # photos reconstructed from a published data file remember their real dir
+        d = ph.get("_dir", slug)
+        loc["photos"].append({k: v for k, v in ph.items() if k != "_dir"} | {"file": f"{d}/{ph['file']}"})
 
 # group locations within 50 km; the member with the most photos anchors the
 # group and keeps its name and coordinates

@@ -26,3 +26,6 @@ scripts/border-polys.json
 *.njsproj
 *.sln
 *.sw?
+
+# photo-pipeline working state (metadata dumps, exports, manifest)
+.pipeline
