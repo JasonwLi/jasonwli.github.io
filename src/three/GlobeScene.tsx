@@ -139,11 +139,12 @@ function Rig({ reducedMotion }: { reducedMotion: boolean }) {
   const { gl, size, scene, camera } = useThree()
   const active = useSite((s) => s.active)
 
-  const sectionEls = useRef<Record<'hero' | 'work' | 'travel' | 'contact', HTMLElement | null>>({
+  const sectionEls = useRef<Record<'hero' | 'work' | 'travel' | 'contact' | 'col', HTMLElement | null>>({
     hero: null,
     work: null,
     travel: null,
     contact: null,
+    col: null,
   })
   const wasInTravel = useRef(false)
   const enteredTravel = useRef(false)
@@ -384,6 +385,7 @@ function Rig({ reducedMotion }: { reducedMotion: boolean }) {
       els.work = document.getElementById('work')
       els.travel = document.getElementById('travel')
       els.contact = document.getElementById('contact')
+      els.col = document.querySelector<HTMLElement>('.travel-col')
     }
     const { hero: heroEl, work: workEl, travel: travelEl } = els
     const aspect = size.width / size.height
@@ -414,10 +416,14 @@ function Rig({ reducedMotion }: { reducedMotion: boolean }) {
       // (the disc plus its atmosphere must stay inside on narrow-aspect screens)
       const wx = mobile ? 0 : Math.min(vpW * 0.36, vpW / 2 - ws * 1.3)
       const wy = mobile ? -1.05 : 0.02
-      const galleryOpen = !!useSite.getState().active
-      const tx = mobile || !galleryOpen ? 0 : -vpW * 0.13
-      const ty = mobile ? -0.12 : -0.04
-      const ts = mobile ? 0.66 : 0.84
+      // travel: the index column owns the left edge; centre the globe in what
+      // remains and keep it clear of the column's right edge
+      const colRight = mobile ? 0 : (els.col?.getBoundingClientRect().right ?? 0)
+      const freePx = size.width - colRight
+      const tx = mobile ? 0 : ((colRight + freePx / 2 - size.width / 2) / size.width) * vpW
+      const ty = mobile ? 0.28 : -0.02
+      const freeW = (freePx / size.width) * vpW
+      const ts = mobile ? 0.58 : Math.min(0.84, freeW / 2.4)
 
       x = THREE.MathUtils.lerp(x, wx, workIn)
       y = THREE.MathUtils.lerp(y, wy, workIn)
@@ -439,10 +445,6 @@ function Rig({ reducedMotion }: { reducedMotion: boolean }) {
         )
         dim = THREE.MathUtils.lerp(dim, 0.5, footIn)
       }
-
-      // the zoom cluster is absolutely positioned inside the travel section; gate
-      // it here so it never rides up over the site nav as the footer scrolls in
-      travelEl.classList.toggle('is-inview', travelIn > 0.5 && footIn < 0.35)
 
       // auto-close the gallery when *leaving* the travel section — edge-triggered,
       // so a gallery opened from the hero survives the glide down

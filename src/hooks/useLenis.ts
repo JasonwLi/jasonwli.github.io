@@ -12,7 +12,7 @@ export function useLenis(enabled: boolean) {
       // let overlaid scrollables own their wheel events; the globe owns the
       // wheel while the pointer is on its disc in the travel section (zoom)
       prevent: (node) =>
-        !!(node as HTMLElement).closest?.('.gallery, .lightbox, .loc-strip') ||
+        !!(node as HTMLElement).closest?.('.travel-panel, .gallery, .lightbox') ||
         (globeState.pointerInGlobe && globeState.travelIn > 0.55),
     })
     lenisRef.current = lenis

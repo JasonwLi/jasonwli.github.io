@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import {
@@ -11,74 +11,59 @@ import {
   type TravelLocation,
 } from '../data/travel'
 import { useSite } from '../state/store'
-import { globeState } from '../three/globeState'
 
-function ZoomControls() {
-  const bump = (d: number) => {
-    globeState.targetZoom = Math.min(Math.max(globeState.targetZoom + d, 1), 2.8)
-    globeState.lastInteraction = performance.now()
+const MOBILE = '(max-width: 860px)'
+
+function useMediaQuery(q: string) {
+  const [m, setM] = useState(() => window.matchMedia(q).matches)
+  useEffect(() => {
+    const mq = window.matchMedia(q)
+    const cb = () => setM(mq.matches)
+    mq.addEventListener('change', cb)
+    return () => mq.removeEventListener('change', cb)
+  }, [q])
+  return m
+}
+
+/** places grouped by country, countries in order of first visit */
+const groups = (() => {
+  const byCc = new Map<string, TravelLocation[]>()
+  for (const loc of locations) {
+    const list = byCc.get(loc.cc)
+    if (list) list.push(loc)
+    else byCc.set(loc.cc, [loc])
   }
-  return (
-    <div className="zoom-controls" data-interactive>
-      <button aria-label="Zoom in" onClick={() => bump(0.35)}>
-        +
-      </button>
-      <button aria-label="Zoom out" onClick={() => bump(-0.35)}>
-        −
-      </button>
-      <button
-        className="zoom-reset"
-        aria-label="Reset zoom"
-        onClick={() => {
-          globeState.targetZoom = 1
-        }}
-      >
-        1:1
-      </button>
-    </div>
-  )
-}
+  return [...byCc.entries()].map(([cc, locs]) => ({ cc, name: countryName(cc), locs }))
+})()
+/** the index order — what prev/next and arrow keys walk */
+const ordered = groups.flatMap((g) => g.locs)
 
-/** chips grouped by country, countries in order of first visit */
-function useCountryGroups() {
-  return useMemo(() => {
-    const byCc = new Map<string, TravelLocation[]>()
-    for (const loc of locations) {
-      const list = byCc.get(loc.cc)
-      if (list) list.push(loc)
-      else byCc.set(loc.cc, [loc])
-    }
-    const groups = [...byCc.entries()].map(([cc, locs]) => ({
-      cc,
-      name: countryName(cc),
-      locs,
-    }))
-    return { groups, ordered: groups.flatMap((g) => g.locs) }
-  }, [])
-}
+/** the place last opened, so "all places" lands you back where you were */
+let lastSlug: string | null = null
 
 function LocationIndex() {
   const active = useSite((s) => s.active)
   const setActive = useSite((s) => s.setActive)
   const listRef = useRef<HTMLDivElement>(null)
-  const { groups, ordered } = useCountryGroups()
-  // roving tabindex: the chip strip is a single tab stop, arrows move within it
-  const [focusIdx, setFocusIdx] = useState(0)
+  // roving tabindex: the list is a single tab stop, arrows move within it
+  const [focusIdx, setFocusIdx] = useState(() =>
+    Math.max(0, ordered.findIndex((l) => l.slug === (active?.slug ?? lastSlug))),
+  )
 
-  // keep the active chip in view
+  // keep the current (or last-opened) place in view
   useEffect(() => {
-    if (!active || !listRef.current) return
-    const el = listRef.current.querySelector<HTMLElement>(
-      `[data-slug="${active.slug}"]`,
-    )
-    el?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })
+    const slug = active?.slug ?? lastSlug
+    if (!slug) return
+    const row = listRef.current?.querySelector<HTMLElement>(`[data-slug="${slug}"]`)
+    const panel = listRef.current?.closest<HTMLElement>('.travel-panel')
+    // scroll the panel itself — scrollIntoView would also move the page
+    if (row && panel) panel.scrollTop = row.offsetTop - panel.clientHeight / 2
   }, [active])
 
   const onKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
     e.preventDefault()
-    const next =
-      (focusIdx + (e.key === 'ArrowRight' ? 1 : -1) + ordered.length) % ordered.length
+    const next = (focusIdx + (e.key === 'ArrowDown' ? 1 : -1) + ordered.length) % ordered.length
     setFocusIdx(next)
     listRef.current
       ?.querySelector<HTMLElement>(`[data-slug="${ordered[next].slug}"]`)
@@ -87,41 +72,48 @@ function LocationIndex() {
 
   return (
     <nav className="loc-index" aria-label="Visited places">
-      <div className="loc-strip" ref={listRef} data-interactive onKeyDown={onKeyDown}>
+      <div className="loc-list" ref={listRef} onKeyDown={onKeyDown}>
         {groups.map((g) => (
-          <div className="loc-group" key={g.cc} role="group" aria-label={g.name}>
-            <span className="loc-country mono" aria-hidden="true">
+          <section className="loc-group" key={g.cc} aria-label={g.name}>
+            <h3 className="loc-country mono">
               {g.name}
-            </span>
-            <div className="loc-group-chips">
+              <span className="loc-country-n"> {g.locs.length}</span>
+            </h3>
+            <ul>
               {g.locs.map((loc) => {
                 const i = ordered.indexOf(loc)
+                const empty = loc.photos.length === 0
                 return (
-                  <button
-                    key={loc.slug}
-                    data-slug={loc.slug}
-                    tabIndex={i === focusIdx ? 0 : -1}
-                    aria-pressed={active?.slug === loc.slug}
-                    aria-label={`${loc.name}, ${g.name}`}
-                    className={`loc-chip${active?.slug === loc.slug ? ' is-active' : ''}${loc.photos.length === 0 ? ' is-empty' : ''}`}
-                    onClick={() => {
-                      setFocusIdx(i)
-                      setActive(active?.slug === loc.slug ? null : loc)
-                    }}
-                  >
-                    <span className="map-label">{loc.name}</span>
-                  </button>
+                  <li key={loc.slug}>
+                    <button
+                      data-slug={loc.slug}
+                      tabIndex={i === focusIdx ? 0 : -1}
+                      aria-pressed={active?.slug === loc.slug}
+                      aria-label={`${loc.name}, ${g.name}${empty ? ', no photographs' : ''}`}
+                      className={`loc-row${active?.slug === loc.slug ? ' is-active' : ''}${empty ? ' is-empty' : ''}`}
+                      onClick={() => {
+                        setFocusIdx(i)
+                        lastSlug = loc.slug
+                        setActive(loc)
+                      }}
+                    >
+                      <span className="map-label">{loc.name}</span>
+                      <span className="mono loc-row-n">
+                        {empty ? '—' : loc.photos.length}
+                      </span>
+                    </button>
+                  </li>
                 )
               })}
-            </div>
-          </div>
+            </ul>
+          </section>
         ))}
       </div>
     </nav>
   )
 }
 
-function GalleryPanel({ loc }: { loc: TravelLocation }) {
+function GalleryPanel({ loc, sheet }: { loc: TravelLocation; sheet: boolean }) {
   const setActive = useSite((s) => s.setActive)
   const setLightbox = useSite((s) => s.setLightbox)
   const reduce = useReducedMotion()
@@ -142,25 +134,35 @@ function GalleryPanel({ loc }: { loc: TravelLocation }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const idx = locations.indexOf(loc)
-  const prev = locations[(idx - 1 + locations.length) % locations.length]
-  const next = locations[(idx + 1) % locations.length]
+  const idx = ordered.indexOf(loc)
+  const prev = ordered[(idx - 1 + ordered.length) % ordered.length]
+  const next = ordered[(idx + 1) % ordered.length]
+
+  const slide = sheet
+    ? { initial: reduce ? false : { x: '104%' }, animate: { x: 0 }, exit: reduce ? undefined : { x: '104%' } }
+    : { initial: reduce ? false : { opacity: 0, x: -12 }, animate: { opacity: 1, x: 0 }, exit: undefined }
 
   return (
     <motion.aside
-      className="gallery"
-      role="dialog"
-      aria-modal="false"
+      className={`gallery${sheet ? ' is-sheet' : ' in-column'}`}
+      role={sheet ? 'dialog' : 'region'}
+      aria-modal={sheet ? 'false' : undefined}
       aria-label={`Photos from ${loc.name}`}
-      initial={reduce ? false : { x: '104%' }}
-      animate={{ x: 0 }}
-      exit={reduce ? undefined : { x: '104%' }}
-      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      {...slide}
+      transition={{ duration: sheet ? 0.55 : 0.35, ease: [0.22, 1, 0.36, 1] }}
       data-interactive
       data-lenis-prevent
     >
       <header className="gallery-head">
-        <div>
+        <button
+          ref={closeRef}
+          className="gallery-close"
+          onClick={() => setActive(null)}
+          aria-label={sheet ? 'Close gallery' : 'Back to all places'}
+        >
+          {sheet ? '✕' : <><span aria-hidden="true">‹ </span>all places</>}
+        </button>
+        <div className="gallery-title">
           <h3 className="map-label gallery-name">{loc.name}</h3>
           <p className="gallery-meta">
             {countryName(loc.cc)}
@@ -170,14 +172,6 @@ function GalleryPanel({ loc }: { loc: TravelLocation }) {
             </span>
           </p>
         </div>
-        <button
-          ref={closeRef}
-          className="gallery-close"
-          onClick={() => setActive(null)}
-          aria-label="Close gallery"
-        >
-          ✕
-        </button>
       </header>
 
       <div className="gallery-photos" key={loc.slug}>
@@ -192,15 +186,10 @@ function GalleryPanel({ loc }: { loc: TravelLocation }) {
             onClick={() => setLightbox({ location: loc, index: i })}
             initial={reduce ? false : { opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.18 + i * 0.07, ease: [0.25, 1, 0.5, 1] }}
+            transition={{ duration: 0.6, delay: 0.12 + i * 0.07, ease: [0.25, 1, 0.5, 1] }}
             aria-label={`${loc.name}, ${countryName(loc.cc)} — open photograph ${i + 1} of ${loc.photos.length} full-screen`}
           >
-            <img
-              src={p.blur}
-              aria-hidden="true"
-              alt=""
-              className="photo-blur"
-            />
+            <img src={p.blur} aria-hidden="true" alt="" className="photo-blur" />
             <img
               src={photoMediumUrl(loc, p)}
               alt=""
@@ -222,7 +211,7 @@ function GalleryPanel({ loc }: { loc: TravelLocation }) {
           ‹ <span className="map-label">{prev.name}</span>
         </button>
         <span className="mono">
-          {idx + 1} / {locations.length}
+          {idx + 1} / {ordered.length}
         </span>
         <button className="gallery-nav" onClick={() => useSite.getState().setActive(next)}>
           <span className="map-label">{next.name}</span> ›
@@ -234,28 +223,43 @@ function GalleryPanel({ loc }: { loc: TravelLocation }) {
 
 export function Travel() {
   const active = useSite((s) => s.active)
+  const mobile = useMediaQuery(MOBILE)
 
   return (
     <section id="travel" className="travel">
-      <header className="travel-head prose">
-        <h2>The globe</h2>
-        <p className="travel-stats mono">
-          {stats.places} places · {stats.countries} countries · {stats.photos} photographs ·{' '}
-          {stats.firstYear} — {stats.lastYear}
+      <div className="travel-col" data-interactive>
+        <header className="travel-head prose">
+          <h2>The globe</h2>
+          <p className="travel-stats mono">
+            {stats.places} places · {stats.countries} countries · {stats.photos} photographs ·{' '}
+            {stats.firstYear} — {stats.lastYear}
+          </p>
+        </header>
+
+        {/* the column is the index, or the open place's gallery */}
+        <div className="travel-panel" data-lenis-prevent>
+          {mobile || !active ? (
+            <LocationIndex />
+          ) : (
+            <AnimatePresence mode="wait">
+              <GalleryPanel key={active.slug} loc={active} sheet={false} />
+            </AnimatePresence>
+          )}
+        </div>
+
+        <p className="travel-hint mono" aria-hidden="true">
+          drag to spin · scroll to zoom · double-click to lean in
         </p>
-      </header>
+      </div>
 
-      <ZoomControls />
-      <LocationIndex />
-
-      {/* portal: the sheet must stack above the site nav, outside main's context.
-          keyed statically — prev/next swaps content without remounting the sheet */}
-      {createPortal(
-        <AnimatePresence>
-          {active && <GalleryPanel key="gallery" loc={active} />}
-        </AnimatePresence>,
-        document.body,
-      )}
+      {/* phones keep the full-screen sheet, portaled above the site nav */}
+      {mobile &&
+        createPortal(
+          <AnimatePresence>
+            {active && <GalleryPanel key="sheet" loc={active} sheet />}
+          </AnimatePresence>,
+          document.body,
+        )}
     </section>
   )
 }
