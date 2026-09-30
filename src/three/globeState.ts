@@ -20,4 +20,7 @@ export const globeState = {
   travelIn: 0,
   /** true while the pointer sits over the globe's projected disc */
   pointerInGlobe: false,
+  /** projected disc, in canvas px — the drag/zoom maths grab the surface with these */
+  radiusPx: 1,
+  centerPx: [0, 0] as [number, number],
 }

@@ -248,7 +248,7 @@ export function Travel() {
         </div>
 
         <p className="travel-hint mono" aria-hidden="true">
-          drag to spin · scroll to zoom · double-click to lean in
+          drag to spin · wheel or pinch to zoom · double-click to lean in
         </p>
       </div>
 

@@ -171,6 +171,9 @@ function Rig({ reducedMotion }: { reducedMotion: boolean }) {
     let px = 0
     let py = 0
     let dragDist = 0
+    // active touches, for pinch-to-zoom
+    const pointers = new Map<number, [number, number]>()
+    let pinchDist = 0
     const pingLocals = locations.map((loc) => latLonToVec3(loc.lat, loc.lon, PING_RADIUS))
     const tmp = new THREE.Vector3()
     const center = new THREE.Vector3()
@@ -207,6 +210,13 @@ function Rig({ reducedMotion }: { reducedMotion: boolean }) {
 
     const down = (e: PointerEvent) => {
       if (e.button !== 0 && e.pointerType === 'mouse') return
+      pointers.set(e.pointerId, [e.clientX, e.clientY])
+      if (pointers.size === 2) {
+        const [a, b] = [...pointers.values()]
+        pinchDist = Math.hypot(a[0] - b[0], a[1] - b[1])
+        globeState.dragging = false
+        return
+      }
       globeState.dragging = true
       globeState.lastInteraction = performance.now()
       px = e.clientX
@@ -228,25 +238,42 @@ function Rig({ reducedMotion }: { reducedMotion: boolean }) {
       const rPx = Math.hypot((((rEdge.x + 1) / 2) * rect.width) - cx, (((1 - rEdge.y) / 2) * rect.height) - cy)
       globeState.pointerInGlobe =
         Math.hypot(clientX - rect.left - cx, clientY - rect.top - cy) < rPx * 1.04
+      globeState.radiusPx = Math.max(rPx, 1)
+      globeState.centerPx = [cx, cy]
     }
 
+    // rotate so the surface under the pointer moves with it (px → radians on the
+    // projected disc); identical feel at every zoom level
+    const grab = (dxPx: number, dyPx: number) => {
+      const k = 1.1 / globeState.radiusPx
+      globeState.targetYaw += dxPx * k
+      globeState.targetPitch = THREE.MathUtils.clamp(
+        globeState.targetPitch + dyPx * k,
+        -1.25,
+        1.25,
+      )
+      globeState.lastInteraction = performance.now()
+    }
     const move = (e: PointerEvent) => {
       updatePointerInGlobe(e.clientX, e.clientY)
+      if (pointers.has(e.pointerId)) pointers.set(e.pointerId, [e.clientX, e.clientY])
+      if (pointers.size === 2 && globeState.travelIn > 0.55) {
+        const [a, b] = [...pointers.values()]
+        const d = Math.hypot(a[0] - b[0], a[1] - b[1])
+        if (pinchDist > 0) {
+          globeState.targetZoom = THREE.MathUtils.clamp(globeState.targetZoom * (d / pinchDist), 1, 2.8)
+          globeState.lastInteraction = performance.now()
+        }
+        pinchDist = d
+        return
+      }
       if (globeState.dragging) {
         const dx = e.clientX - px
         const dy = e.clientY - py
         px = e.clientX
         py = e.clientY
         dragDist += Math.abs(dx) + Math.abs(dy)
-        // finer control while leaned in
-        const k = 1 / Math.max(globeState.zoom, 1)
-        globeState.targetYaw += dx * 0.0052 * k
-        globeState.targetPitch = THREE.MathUtils.clamp(
-          globeState.targetPitch + dy * 0.0032 * k,
-          -1.25,
-          1.25,
-        )
-        globeState.lastInteraction = performance.now()
+        grab(dx, dy)
       } else if (e.target === el) {
         const hit = pingAt(e.clientX, e.clientY)
         const { hovered, setHovered } = useSite.getState()
@@ -255,18 +282,36 @@ function Rig({ reducedMotion }: { reducedMotion: boolean }) {
       }
     }
 
-    // wheel over the globe disc zooms (page scrolls normally elsewhere)
+    // wheel over the globe disc (page scrolls normally elsewhere):
+    //  - mouse wheel and trackpad pinch (ctrlKey) zoom, toward the cursor
+    //  - once leaned in, a trackpad two-finger scroll pans the surface instead
     const wheel = (e: WheelEvent) => {
       if (!(globeState.pointerInGlobe && globeState.travelIn > 0.55)) return
       e.preventDefault()
-      globeState.targetZoom = THREE.MathUtils.clamp(
-        globeState.targetZoom * Math.exp(-e.deltaY * 0.0014),
-        1,
-        2.8,
-      )
-      globeState.lastInteraction = performance.now()
+      const g = globeState
+      const trackpad = e.deltaMode === 0 && (e.deltaX !== 0 || !Number.isInteger(e.deltaY))
+      if (trackpad && !e.ctrlKey && g.targetZoom > 1.15) {
+        grab(-e.deltaX, -e.deltaY)
+        return
+      }
+      const before = g.targetZoom
+      const after = THREE.MathUtils.clamp(before * Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0014)), 1, 2.8)
+      if (after === before) return
+      // keep the point under the cursor under the cursor: the surface would slide
+      // outward by (q-1) of its offset from centre, so pull it back by that much
+      const rect = el.getBoundingClientRect()
+      const ox = e.clientX - rect.left - g.centerPx[0]
+      const oy = e.clientY - rect.top - g.centerPx[1]
+      const q = after / before
+      const k = (q - 1) / (g.radiusPx * q)
+      g.targetYaw -= ox * k
+      g.targetPitch = THREE.MathUtils.clamp(g.targetPitch - oy * k, -1.25, 1.25)
+      g.targetZoom = after
+      g.lastInteraction = performance.now()
     }
     const up = (e: PointerEvent) => {
+      pointers.delete(e.pointerId)
+      pinchDist = 0
       const wasDragging = globeState.dragging
       globeState.dragging = false
       globeState.lastInteraction = performance.now()
@@ -317,7 +362,9 @@ function Rig({ reducedMotion }: { reducedMotion: boolean }) {
     }
     // touch scrolling fires pointercancel, not pointerup — without this the
     // globe keeps rotating with every scroll gesture
-    const cancel = () => {
+    const cancel = (e: PointerEvent) => {
+      pointers.delete(e.pointerId)
+      pinchDist = 0
       globeState.dragging = false
       globeState.lastInteraction = performance.now()
     }
@@ -477,6 +524,10 @@ function Rig({ reducedMotion }: { reducedMotion: boolean }) {
 
     // user zoom applies only while the travel section owns the view
     g.zoom = damp(g.zoom, g.targetZoom, 6, dt)
+    // leaned in on a phone, vertical touch drags pitch the globe instead of
+    // scrolling the page; otherwise the page keeps its scroll gesture
+    const ta = g.zoom > 1.15 && travelInGlobal > 0.55 ? 'none' : 'pan-y'
+    if (gl.domElement.style.touchAction !== ta) gl.domElement.style.touchAction = ta
     if (travelInGlobal < 0.3) g.targetZoom = 1
     s *= THREE.MathUtils.lerp(1, g.zoom, travelInGlobal)
 
