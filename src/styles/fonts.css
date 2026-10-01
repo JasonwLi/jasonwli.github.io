@@ -1,0 +1,44 @@
+/*
+ * Metric-matched fallbacks for the self-hosted Castoro faces (the faces
+ * themselves come from @fontsource/castoro and @fontsource/castoro-titling,
+ * imported in main.tsx, font-display: swap, preloaded in index.html).
+ *
+ * Measured with fontTools (scripts/terrain/.venv) against the fontsource
+ * woff2 files and macOS Georgia, on a sample of the site's own copy:
+ *   size-adjust     = advance(Castoro) / advance(Georgia) over the sample
+ *   ascent-override = 755 / 1000 / size-adjust   (Castoro hhea = typo, USE_TYPO_METRICS)
+ *   descent-override= 245 / 1000 / size-adjust
+ *   line-gap        = 330 / 1000 / size-adjust
+ * so a swap moves nothing (CLS ~ 0). Titling is caps-only, so its fallback is
+ * matched on natural-case strings rendered as Titling capitals.
+ */
+@font-face {
+  font-family: 'Castoro Fallback';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Georgia'), local('Georgia Regular');
+  size-adjust: 101.8%;
+  ascent-override: 74.2%;
+  descent-override: 24.1%;
+  line-gap-override: 32.4%;
+}
+@font-face {
+  font-family: 'Castoro Fallback';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Georgia Italic'), local('Georgia-Italic');
+  size-adjust: 96.5%;
+  ascent-override: 78.2%;
+  descent-override: 25.4%;
+  line-gap-override: 34.2%;
+}
+@font-face {
+  font-family: 'Castoro Titling Fallback';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Georgia'), local('Georgia Regular');
+  size-adjust: 131.6%;
+  ascent-override: 57.4%;
+  descent-override: 18.6%;
+  line-gap-override: 25.1%;
+}

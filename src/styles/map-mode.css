@@ -1,0 +1,245 @@
+/* Map mode (C3): the MapModeScale switch and the climate legend in the travel column.
+   Flat, engraved: no pills, fills, gradients, glass or side stripes. Focus uses the
+   shared :focus-visible ring (global.css). */
+
+.map-mode-panel {
+  margin-top: 24px;
+  pointer-events: auto; /* phones: the column itself passes drags to the globe */
+}
+
+/* ---- the scale: 216 x 44, two 44 px radios over a ScaleRule ---- */
+.map-mode-scale {
+  position: relative;
+  height: 44px;
+}
+.map-mode-rule {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+.map-mode-option {
+  position: absolute;
+  top: 0;
+  height: 44px;
+  margin: 0;
+  padding: 5px 0 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  font-family: var(--font-title);
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: 0.16em;
+  color: var(--silver-3);
+  transition: color var(--t-micro) var(--ease-out-quart);
+  -webkit-tap-highlight-color: transparent;
+}
+.map-mode-label {
+  /* tracking adds trailing space after the last capital: re-centre */
+  margin-right: -0.16em;
+}
+@media (hover: hover) {
+  .map-mode-option:hover {
+    color: var(--silver-2);
+  }
+}
+.map-mode-option.is-selected {
+  color: var(--silver);
+}
+
+/* ---- legend: 0 -> 150 px ---- */
+.climate-legend-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 280ms var(--ease-out-quart);
+}
+.climate-legend-wrap.is-open {
+  grid-template-rows: 1fr;
+}
+.climate-legend-clip {
+  min-height: 0;
+  overflow: hidden;
+  /* room for the focus ring inside the clip */
+  margin: 0 -6px;
+  padding: 0 6px;
+}
+.climate-legend {
+  position: relative;
+  height: 150px;
+  padding-top: 6px;
+  box-sizing: border-box;
+}
+.climate-progress {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--gilt);
+  transform-origin: 0 50%;
+  transform: scaleX(1);
+  opacity: 0;
+  transition: opacity 240ms var(--ease-out-quart) 120ms, transform 200ms var(--ease-out-quart);
+}
+.climate-legend.is-loading .climate-progress {
+  opacity: 1;
+  animation: climate-progress 2400ms var(--ease-out-quart) both;
+}
+@keyframes climate-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(0.9);
+  }
+}
+
+.climate-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.climate-rows li {
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out-quart);
+}
+.climate-legend-wrap.is-open .climate-rows li {
+  opacity: 1;
+  transition-delay: calc(80ms + var(--row-i, 0) * 30ms);
+}
+.climate-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  padding: 0 6px 0 4px;
+  border: 0;
+  background: none;
+  color: var(--silver);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) {
+  .climate-row:hover {
+    background: var(--steel-raised);
+  }
+}
+.climate-mark {
+  flex: none;
+  opacity: 0;
+  transition: opacity var(--t-micro) var(--ease-out-quart);
+}
+.climate-row[aria-pressed='true'] .climate-mark {
+  opacity: 1;
+}
+.climate-swatch {
+  flex: none;
+  transition: opacity 240ms var(--ease-out-quart);
+}
+.climate-legend.is-loading .climate-swatch {
+  opacity: 0.35;
+}
+.swatch-hairline {
+  stroke: var(--gilt-worn);
+  stroke-width: 1;
+}
+.climate-row[aria-pressed='true'] .swatch-hairline {
+  stroke: var(--gilt);
+}
+.swatch-incise {
+  stroke: var(--incise);
+  stroke-width: 1;
+}
+.climate-key {
+  flex: none;
+  width: 1.1em;
+  font-family: var(--font-title);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--silver-2);
+}
+.climate-name {
+  font-family: var(--font-text);
+  font-size: 14px;
+  line-height: 1;
+  color: var(--silver);
+  white-space: nowrap;
+}
+
+.climate-codes {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.42em;
+  height: 22px;
+  margin: 2px 0 0;
+  padding-left: 20px;
+  overflow: hidden;
+  font-family: var(--font-text);
+  font-size: 13px;
+  line-height: 22px;
+  color: var(--silver-3);
+  white-space: nowrap;
+}
+.climate-codes abbr {
+  text-decoration: none;
+  cursor: help;
+}
+
+@media (max-width: 860px) {
+  .map-mode-panel {
+    margin-top: 12px;
+  }
+  .climate-legend {
+    height: auto;
+    padding-bottom: 2px;
+  }
+  /* 3 + 2 */
+  .climate-rows {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: space-between;
+    column-gap: 6px;
+  }
+  .climate-row {
+    height: 32px;
+    gap: 6px;
+    padding: 0 2px;
+  }
+  .climate-mark {
+    display: none;
+  }
+  .climate-row[aria-pressed='true'] {
+    background: var(--steel-raised);
+  }
+  .climate-codes {
+    padding-left: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .climate-legend-wrap,
+  .climate-rows li,
+  .climate-progress {
+    transition: none;
+  }
+  .climate-legend.is-loading .climate-progress {
+    animation: none;
+    transform: scaleX(0.5);
+  }
+}
+
+@media (forced-colors: active) {
+  .climate-swatch rect:nth-child(2) {
+    forced-color-adjust: none;
+  }
+  .climate-row[aria-pressed='true'] {
+    outline: 1px solid Highlight;
+  }
+}

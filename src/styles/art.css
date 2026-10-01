@@ -1,0 +1,147 @@
+/*
+ * The drawing kit (src/art/*). Flat strokes only: an engraving is an --incise
+ * groove under one flat line. No gradients, glows, bevels or drop shadows.
+ */
+
+/* tones */
+.incise {
+  stroke: var(--incise);
+}
+.incise-dot {
+  fill: var(--incise);
+}
+.tone-gilt {
+  stroke: var(--gilt);
+}
+.tone-gilt-2 {
+  stroke: var(--gilt-2);
+}
+.tone-gilt-worn {
+  stroke: var(--gilt-worn);
+}
+.tone-silver-2 {
+  stroke: var(--silver-2);
+}
+.tone-silver-3 {
+  stroke: var(--silver-3);
+}
+.fill-gilt {
+  fill: var(--gilt);
+}
+.fill-gilt-worn {
+  fill: var(--gilt-worn);
+}
+.fill-silver-3 {
+  fill: var(--silver-3);
+}
+
+/* ENGRAVE: the cut draws on along its natural direction (pathLength = 1) */
+.engrave-draw path {
+  stroke-dasharray: 1 2;
+  animation: art-engrave var(--draw-dur, var(--t-engrave)) var(--ease-burin) var(--draw-delay, 0ms) both;
+}
+@keyframes art-engrave {
+  from {
+    stroke-dashoffset: 1.001;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* SCALE RULE: majors grow from the baseline, the index slides between stations */
+.scale-major {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transition: transform var(--t-micro) var(--ease-out-quart);
+}
+.scale-major.is-current {
+  transform: scaleY(1.3636); /* 11 -> 15 px; strokes are non-scaling */
+}
+.scale-index--ease {
+  transition: transform 240ms var(--ease-out-quart);
+}
+.scale-rule--draw .scale-minors,
+.scale-rule--draw .scale-major,
+.scale-rule--draw .scale-index {
+  animation: art-fade 240ms var(--ease-out-quart) 520ms both;
+}
+.scale-rule--draw .scale-major {
+  animation-delay: 440ms; /* tick classes lead each other by 80 ms */
+}
+@keyframes art-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* inline marks */
+.art {
+  display: inline-block;
+  flex: none;
+}
+.dot {
+  margin-inline: 0.5em;
+  /* centre the 3 px dot on Castoro's x-height (0.475 em) */
+  vertical-align: calc(0.2375em - 1.5px);
+}
+.empty-rule {
+  vertical-align: calc(0.2375em - 0.5px);
+}
+
+/* ICONS: currentColor strokes over a groove; hover changes the colour only */
+.icon {
+  display: block;
+  flex: none;
+}
+.icon .incise path {
+  stroke: var(--incise);
+}
+.icon-dot {
+  fill: currentColor;
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--silver-2);
+  transition: color var(--t-micro) var(--ease-out-quart);
+}
+.icon-btn:hover {
+  color: var(--silver);
+}
+.icon-btn:active {
+  transform: translateY(0.5px);
+  transition-duration: 80ms;
+}
+.icon-btn:disabled {
+  color: var(--silver-3);
+  cursor: default;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* every piece is already cut */
+  .engrave-draw path,
+  .scale-rule--draw .scale-minors,
+  .scale-rule--draw .scale-major,
+  .scale-rule--draw .scale-index {
+    animation: none;
+  }
+  .scale-index--ease {
+    transition: none;
+  }
+}

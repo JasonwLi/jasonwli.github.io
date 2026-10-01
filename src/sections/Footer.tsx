@@ -1,4 +1,10 @@
-// Contact is assembled at click time from encoded parts — nothing for
+import { useEffect, useRef } from 'react'
+import { Dot, Engraved, Icons } from '../art'
+import { Credits } from './Credits'
+import { useEnteredView } from './hooks'
+import { globeState, subscribeFrame } from '../three/globeState'
+
+// Contact is assembled at click time from encoded parts: nothing for
 // address-harvesting crawlers to scrape out of the HTML or the bundle.
 const ENC = {
   mail: 'anp3bDk2QGdtYWlsLmNvbQ==',
@@ -12,31 +18,118 @@ function openContact(key: keyof typeof ENC) {
   else window.open(v, '_blank', 'noopener')
 }
 
+const ACTIONS = [
+  { key: 'mail', label: 'Email', name: 'Send an email', Icon: Icons.Mail },
+  {
+    key: 'github',
+    label: 'GitHub',
+    name: 'Open GitHub profile',
+    Icon: Icons.GitHub,
+  },
+  {
+    key: 'linkedin',
+    label: 'LinkedIn',
+    name: 'Open LinkedIn profile',
+    Icon: Icons.LinkedIn,
+  },
+] as const
+
+const RULE_W = 720
+/** the limb ring's reach beyond the silhouette (LIMB rim: full 48, compact 28 under R 220) */
+const RING_FULL = 48
+const RING_COMPACT = 28
+/** clear steel between the rule's end and the ring (finish review round 2) */
+const RING_GAP = 40
+const RULE_MIN = 120
+
+/**
+ * The gilt rule ends short of the dimmed globe's limb ring: each frame while the rule is
+ * on screen, where the rule's line crosses the ring's outer circle, the rule
+ * is cut back to leave RING_GAP of steel before it (the ring rests where it did in travel).
+ */
+function useRuleClearOfRing(ref: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    let last = -1
+    return subscribeFrame(() => {
+      const g = globeState
+      const plate = el.parentElement
+      if (!plate) return
+      const rr = el.getBoundingClientRect()
+      if (rr.top > window.innerHeight || rr.bottom < 0) return
+      const pr = plate.getBoundingClientRect()
+      // the rule's full length: to the plate's content edge
+      const full = pr.right - (parseFloat(getComputedStyle(plate).paddingRight) || 0) - rr.left
+      const R = g.radiusPx + (g.radiusPx < 220 ? RING_COMPACT : RING_FULL)
+      const dy = rr.top + 1 - g.centerPx[1]
+      let w = full
+      if (Math.abs(dy) < R && g.centerPx[0] > rr.left) {
+        const ringLeft = g.centerPx[0] - Math.sqrt(R * R - dy * dy)
+        w = Math.max(RULE_MIN, Math.min(full, ringLeft - RING_GAP - rr.left))
+      }
+      w = Math.round(w)
+      if (w !== last) {
+        last = w
+        el.style.width = w >= Math.round(full) ? '' : `${w}px`
+      }
+    })
+  }, [ref])
+}
+
+/**
+ * The contact plate (theme spec, footer): one engraved hairline, three drawn
+ * actions, the credits. No heading is added; the dimmed globe stays right.
+ */
 export function Footer() {
+  const ruleRef = useRef<HTMLDivElement>(null)
+  const seen = useEnteredView(ruleRef)
+  useRuleClearOfRing(ruleRef)
   return (
     <footer id="contact" className="footer">
-      <div className="contact-icons">
-        <button onClick={() => openContact('mail')} aria-label="Send an email">
-          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-            <rect x="3" y="5" width="18" height="14" rx="1.5" />
-            <path d="M3.5 6.5 12 13l8.5-6.5" />
-          </svg>
-          <span className="mono">email</span>
-        </button>
-        <button onClick={() => openContact('github')} aria-label="Open GitHub profile">
-          <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true">
-            <path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49v-1.7c-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.9-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.7 0 0 .84-.28 2.75 1.05a9.36 9.36 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.4.2 2.44.1 2.7.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.9v2.81c0 .27.18.6.69.49A10.05 10.05 0 0 0 22 12.25C22 6.58 17.52 2 12 2Z" />
-          </svg>
-          <span className="mono">github</span>
-        </button>
-        <button onClick={() => openContact('linkedin')} aria-label="Open LinkedIn profile">
-          <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true">
-            <path d="M4.98 3.5A2.49 2.49 0 0 0 2.5 6c0 1.38 1.1 2.5 2.45 2.5h.03A2.49 2.49 0 0 0 7.5 6a2.49 2.49 0 0 0-2.52-2.5ZM3 21h4V9.75H3V21Zm6.5-11.25V21h4v-6.29c0-1.66.9-2.71 2.26-2.71 1.28 0 1.99.9 1.99 2.71V21h4v-6.79c0-3.51-1.87-5.21-4.44-5.21-2.06 0-3.09 1.15-3.81 2.06v-1.31h-4Z" />
-          </svg>
-          <span className="mono">linkedin</span>
-        </button>
+      <div className="footer-plate">
+        <div className="footer-rule" ref={ruleRef} aria-hidden="true">
+          {seen && (
+            <svg
+              className="art"
+              width="100%"
+              height="2"
+              viewBox={`0 0 ${RULE_W} 2`}
+              preserveAspectRatio="none"
+              overflow="visible"
+              focusable="false"
+            >
+              <Engraved
+                d={`M0,1H${RULE_W}`}
+                w={1}
+                tone="gilt-worn"
+                groove={1.5}
+                draw
+                drawDuration={700}
+                linecap="butt"
+              />
+            </svg>
+          )}
+        </div>
+        <ul className="contact-actions">
+          {ACTIONS.map(({ key, label, name, Icon }) => (
+            <li key={key}>
+              <button type="button" className="contact-btn" onClick={() => openContact(key)} aria-label={name}>
+                <Icon />
+                <span className="contact-label">{label}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div className="footer-fine">
+          <p>
+            © 2026 Jason Li
+            <Dot />
+            all photographs mine
+          </p>
+          <Credits />
+        </div>
       </div>
-      <p className="mono footer-fine">© 2026 Jason Li · all photographs mine</p>
     </footer>
   )
 }

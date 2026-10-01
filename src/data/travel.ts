@@ -65,18 +65,3 @@ export const stats = {
     ? new Date(Math.max(...locations.map((l) => l.last)) * 1000).getFullYear()
     : new Date().getFullYear(),
 }
-
-export function fmtDateRange(loc: TravelLocation): string {
-  const f = new Date(loc.first * 1000)
-  const l = new Date(loc.last * 1000)
-  const fmt = new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric' })
-  const a = fmt.format(f)
-  const b = fmt.format(l)
-  return a === b ? a : `${a} — ${b}`
-}
-
-export function fmtCoords(lat: number, lon: number): string {
-  const ns = lat >= 0 ? 'N' : 'S'
-  const ew = lon >= 0 ? 'E' : 'W'
-  return `${Math.abs(lat).toFixed(2)}°${ns} ${Math.abs(lon).toFixed(2)}°${ew}`
-}

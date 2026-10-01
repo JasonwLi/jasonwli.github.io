@@ -29,3 +29,18 @@ scripts/border-polys.json
 
 # photo-pipeline working state (metadata dumps, exports, manifest)
 .pipeline
+
+# impeccable machine-local config and review captures
+.impeccable/config.local.json
+.impeccable/review
+
+# terrain bake downloads and intermediates
+scripts/.cache
+scripts/data
+scripts/terrain/.venv
+__pycache__/
+
+# build plan + research notes (local only)
+.plan
+.impeccable/questions
+.impeccable/build

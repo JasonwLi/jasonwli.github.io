@@ -1,0 +1,4 @@
+{
+  "prompt": "SOURCED DATA, not generated imagery. Baked by scripts/terrain (bake_physical.py, bake_splats.py, bake_albedo.py, bake_trees.py, encode.py) from: NOAA NCEI ETOPO 2022 60s surface relief (CC0, doi:10.25921/fd45-gt74); Natural Earth 10m physical layers and NE2_HR_LC (public domain); NASA MODIS MCD12Q1 v061 IGBP land cover via NASA GIBS (NASA open data); K\u00f6ppen-Geiger 1991-2020, Beck et al. 2023, Sci. Data 10:724 (CC BY 4.0). Painterly palette authored in scripts/terrain/palette.json. File: albedo_2048x1024.webp.",
+  "createdAt": "2026-10-01T08:01:45.138688+00:00"
+}

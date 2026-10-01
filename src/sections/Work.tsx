@@ -1,42 +1,40 @@
-import { motion, useReducedMotion } from 'motion/react'
+import { Dot } from '../art'
 import { roles } from '../data/work'
+import { SectionHeading } from './HeadingRule'
 
+/**
+ * The work plate (theme spec, work) as the instrument's engraved gazetteer: silver
+ * text on flat steel, the table framed by a fine double rule, each entry ruled off by
+ * a gilt fillet with scale ticks at the date column (site.css, the one tick module).
+ * No icons, no hover, no ornament beyond that structure and the drawn separator dots.
+ * Copy is verbatim from src/data/work.ts. The limb rests dimmed (ticks only) here.
+ */
 export function Work() {
-  const reduce = useReducedMotion()
-  const rise = {
-    initial: reduce ? false : { opacity: 0, y: 16 },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, margin: '-60px' },
-  } as const
   return (
-    <section id="work" className="work">
-      <header className="work-head">
-        <h2>The work</h2>
-      </header>
+    <section id="work" className="work" aria-labelledby="work-h">
+      <SectionHeading id="work-h">The work</SectionHeading>
 
       <ol className="log" aria-label="Roles">
-        {roles.map((r, i) => (
-          <motion.li
-            className="log-row prose"
-            key={r.company}
-            {...rise}
-            transition={{ duration: 0.7, delay: i * 0.06, ease: [0.25, 1, 0.5, 1] }}
-          >
-            <div className="log-when">
-              <span className="mono">{r.period}</span>
-              <span className="mono log-where">{r.location}</span>
-            </div>
+        {roles.map((r) => (
+          // rows are visible from the first paint (craft floor: motion never starts
+          // from hidden); the engraving rules carry the section's motion in CSS
+          <li className="log-row prose" key={r.company}>
+            <p className="log-when data">
+              <span className="log-period">{r.period}</span>
+              <Dot className="log-dot" />
+              <span className="log-where">{r.location}</span>
+            </p>
             <div className="log-what">
               <h3>
-                {r.company}
-                <span className="log-role"> — {r.role}</span>
+                <span className="log-company">{r.company}</span>
+                {' '}
+                <span className="log-role">{r.role}</span>
               </h3>
               <p className="log-summary">{r.summary}</p>
             </div>
-          </motion.li>
+          </li>
         ))}
       </ol>
-
     </section>
   )
 }

@@ -1,0 +1,84 @@
+/*
+ * src/styles/tokens.css: THE ASTROLABE, the only colour source for the DOM.
+ * Flat fills only: no gradients, noise, sheen or vignettes.
+ *
+ * Parity: every literal colour here has an sRGB hex twin in src/theme/tokens.ts
+ * (the three.js side). `node scripts/check-tokens.mjs` asserts they agree within
+ * 1 LSB; `node scripts/check-contrast.mjs` asserts the WCAG pairs below.
+ * Values are authored in OKLCH (all inside sRGB, so no gamut mapping happens).
+ */
+:root {
+  color-scheme: dark;
+
+  /* GROUND: heat-blued steel, raised to the cobalt of fire-bluing (finish review: the
+     earlier L 0.20 C 0.055 read as navy-black); the sea (L 0.34) stays distinct above it */
+  --steel: oklch(0.225 0.088 260); /* #011844 page ground, the mater face, theme-color */
+  --steel-deep: oklch(0.185 0.072 262); /* #021032 lightbox, pin cores, footer plate */
+  --steel-field: oklch(0.26 0.088 258); /* #03224d travel column plate, phone sheet, loading sphere */
+  --steel-raised: oklch(0.288 0.082 257); /* #0c2a52 index row hover (flat), hovered pin core */
+  --incise: oklch(0.125 0.04 264); /* #020516 groove wall of every cut, halos on the globe */
+
+  /* FIRE-GILT BRASS: hairlines, scales, one filigree, the name's capitals. Never running text. */
+  --gilt: oklch(0.8 0.115 84); /* #e1b761 cut lines, scale numerals, crest, name, index triangles */
+  --gilt-2: oklch(0.66 0.095 80); /* #b18c4a minor ticks, fillets, pin rings, control boundaries */
+  --gilt-worn: oklch(0.45 0.06 75); /* #69502e long rules at rest, graticule; decorative, never text */
+
+  /* SILVER: every word a person reads */
+  --silver: oklch(0.92 0.008 250); /* #e1e5ea body, names, headings */
+  --silver-2: oklch(0.78 0.014 252); /* #b1b8c0 data lines, roles, meta, nav at rest */
+  --silver-3: oklch(0.66 0.018 255); /* #8b939d counts, hints, credits, leaders */
+
+  /* VERMILION: the one active place, and nothing else */
+  --vermilion: oklch(0.64 0.205 33); /* #ee4b2b */
+  --vermilion-hi: oklch(0.7 0.18 36); /* #f96d47 pressed/hover on the active row only */
+
+  /* QUIET LINES (steel, not gilt) */
+  --line: oklch(0.38 0.058 257); /* #2e4361 work row separators, photo frames */
+  --rule: oklch(0.46 0.048 256); /* #465973 dividers that bound UI regions */
+
+  /* SCALE MODULE: shared by the limb, nav, map-mode scale and neatline */
+  --cut: 1px;
+  --tick-minor: 4px;
+  --tick-mid: 7px;
+  --tick-major: 11px;
+  --tick-pitch: 6px;
+  --incise-dx: -0.5px;
+  --incise-dy: -0.5px; /* groove offset: light from upper-left */
+
+  /* BROWSER SURFACES */
+  --focus: oklch(0.86 0.13 86); /* #f7cb65 1.5px ring, 3px offset */
+  --focus-shadow: var(--incise); /* 1px outer incise so the ring holds over the paint and photos */
+  --selection-bg: oklch(0.4 0.075 256); /* #2b496f tempered blue, never gilt or vermilion */
+  --selection-fg: oklch(0.96 0.006 250); /* #eff2f6 */
+  --caret: var(--gilt);
+  --scroll-track: var(--steel);
+  --scroll-thumb: oklch(0.42 0.04 256); /* #3f4e63 */
+  --scroll-thumb-hover: var(--gilt-2);
+
+  /* GLOBE-SIDE: the shader side reads src/theme/tokens.ts (same values) */
+  --land-cap-L: 0.66;
+  --sea-L: 0.34;
+  --label-land: oklch(0.26 0.04 60); /* #321f0f umber ink for ranges and deserts on land */
+  --label-sea: oklch(0.85 0.03 230); /* #bbd2de italic sea and ocean names */
+  --label-climate: oklch(0.125 0.04 264 / 0.75); /* land labels in Climate mode */
+
+  /* TYPE: one family, two cuts, regular only (fallback faces in fonts.css) */
+  --font-text: 'Castoro', 'Castoro Fallback', 'Iowan Old Style', Georgia, serif;
+  --font-title: 'Castoro Titling', 'Castoro Titling Fallback', Georgia, serif;
+
+  /* MOTION */
+  --ease-burin: cubic-bezier(0.45, 0, 0.2, 1); /* draw-on: a steady cut, a soft lift */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-micro: 160ms;
+  --t-panel: 360ms;
+  --t-engrave: 900ms;
+
+  /* LAYERS */
+  --z-canvas: 0;
+  --z-instrument: 1;
+  --z-content: 2;
+  --z-nav: 10;
+  --z-sheet: 20;
+  --z-lightbox: 30;
+}

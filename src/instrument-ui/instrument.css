@@ -1,0 +1,232 @@
+/*
+ * The instrument overlay (T1c). Lazy CSS: ships with the overlay chunk.
+ * Flat strokes only: a cut is an --incise groove under one flat line.
+ * Gilt on scales and hairlines, vermilion on the alidade and active marks only,
+ * silver for every word. No CSS transitions on per-frame attributes.
+ */
+
+.instrument-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-instrument);
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  contain: strict;
+}
+.instrument {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+/* zero specificity: any tone / fill class wins */
+:where(.instrument) :where(path, circle) {
+  fill: none;
+}
+.instrument .ins-draw {
+  stroke-dasharray: 1 2;
+}
+.ins-vermilion-cut {
+  stroke: var(--vermilion);
+}
+.ins-blade {
+  fill: var(--vermilion);
+  stroke: var(--incise);
+  stroke-linejoin: round;
+}
+.instrument path {
+  stroke-linecap: butt;
+}
+
+/* limb numerals: Titling, radially set, cut out of the steel by an incise halo */
+.ins-numerals text {
+  font: 400 11px/1 var(--font-title);
+  fill: var(--gilt);
+  stroke: var(--incise);
+  stroke-width: 2px;
+  paint-order: stroke fill;
+  text-anchor: middle;
+  dominant-baseline: central;
+  letter-spacing: 0.04em;
+}
+/* neatline numerals: Titling figures, Castoro hemisphere letter */
+.ins-neat-labels text {
+  font: 400 10px/1 var(--font-title);
+  fill: var(--gilt);
+  stroke: var(--incise);
+  stroke-width: 3px;
+  stroke-opacity: 0.7;
+  paint-order: stroke fill;
+  dominant-baseline: central;
+}
+.ins-neat-labels .ins-hemi {
+  font-family: var(--font-text);
+}
+
+/* the words: HTML positioned by transform from the frame loop */
+.ins-html {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.ins-html > * {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+.ins-meridian {
+  font-size: 12px;
+  line-height: 1;
+  color: var(--silver-2);
+  white-space: nowrap;
+}
+.ins-readout {
+  --ins-read-a: 0;
+}
+.ins-readout-block,
+.ins-readout-line {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: max-content;
+  opacity: var(--ins-read-a);
+  white-space: nowrap;
+}
+.ins-readout-block p {
+  margin: 0;
+}
+.ins-readout-name {
+  font: italic 400 16px/1.25 var(--font-text);
+  color: var(--silver);
+}
+.ins-readout-coords {
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--silver-2);
+}
+.ins-readout-coords .data,
+.ins-readout-line .data {
+  font-size: 13px;
+}
+.ins-readout-dates {
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--silver-3);
+}
+.ins-readout-line {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--silver-2);
+}
+.ins-readout-line .ins-readout-name {
+  font-size: 15px;
+}
+
+/* hover label: no box; italic name over the leader, country under it, incise halos */
+.ins-hover {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: max-content;
+  white-space: nowrap;
+}
+.ins-hover-name {
+  /* the name sits on the leader's horizontal run */
+  transform: translate(4px, calc(-100% - 2px));
+  font: italic 400 15px/1.2 var(--font-text);
+  color: var(--silver);
+}
+.ins-hover-country {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(4px, 3px);
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--silver-2);
+}
+/* words that can land on the paint (deep zoom, the arc stage): an incise halo; on steel it is invisible */
+.ins-readout-block,
+.ins-readout-line,
+.ins-meridian,
+.ins-hover-name,
+.ins-hover-country {
+  -webkit-text-stroke: 3px color-mix(in oklch, var(--incise) 70%, transparent);
+  paint-order: stroke fill;
+}
+.ins-hover[data-left] .ins-hover-name {
+  transform: translate(calc(-100% - 4px), calc(-100% - 2px));
+}
+.ins-hover[data-left] .ins-hover-country {
+  transform: translate(calc(-100% - 4px), 3px);
+}
+
+/* VIEW CONTROLS: in the travel column, on its bottom line */
+.view-controls {
+  position: absolute;
+  left: 34px; /* the 16 px icons align with the column's 48 px text edge */
+  bottom: 11px;
+  display: flex;
+  gap: 0;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-micro) var(--ease-out-quart);
+}
+.view-controls[data-on] {
+  visibility: visible;
+}
+.view-controls[data-on][data-shown],
+.view-controls[data-on]:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (max-width: 860px) {
+  .view-controls {
+    display: none;
+  }
+  /* the 13 px floor for Castoro text on phones */
+  .ins-meridian,
+  .ins-hover-country {
+    font-size: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view-controls {
+    transition-duration: 0ms;
+  }
+}
+
+@media (forced-colors: active) {
+  .ins-vermilion-cut,
+  .tone-gilt,
+  .tone-gilt-2,
+  .tone-gilt-worn {
+    stroke: CanvasText;
+  }
+  .ins-blade {
+    fill: Highlight;
+  }
+  /* the drawn instrument is hidden (global.css): its words lose the paint halo (a forced
+     stroke smears the glyphs) and sit on Canvas; the lone meridian label goes with the limb */
+  .ins-readout-block,
+  .ins-readout-line,
+  .ins-hover-name,
+  .ins-hover-country {
+    -webkit-text-stroke: 0;
+    background: Canvas;
+  }
+  .ins-meridian {
+    display: none;
+  }
+}
+
+/* deep zoom: the steel head margin above the neatline that backs the nav ruler */
+.ins-neat-head {
+  fill: var(--steel-field);
+  stroke: none;
+}

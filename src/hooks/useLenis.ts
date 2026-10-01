@@ -1,21 +1,29 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import Lenis from 'lenis'
 import { globeState } from '../three/globeState'
 
-export function useLenis(enabled: boolean) {
-  const lenisRef = useRef<Lenis | null>(null)
+let current: Lenis | null = null
 
+/** The live Lenis instance, or null when smooth scroll is off (reduced motion). */
+export function getLenis(): Lenis | null {
+  return current
+}
+
+export function useLenis(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return
     const lenis = new Lenis({
       lerp: 0.105,
-      // let overlaid scrollables own their wheel events; the globe owns the
-      // wheel while the pointer is on its disc in the travel section (zoom)
+      // let overlaid scrollables own their wheel events; the globe owns the wheel
+      // when controls.ts says so (globeState.wheelOwner: travel, pointer on the
+      // canvas and not over UI, on the disc or zoomed in, escape hatch not open).
+      // controls.ts listens in the capture phase, so the owner is already updated
+      // for this very event when Lenis asks.
       prevent: (node) =>
         !!(node as HTMLElement).closest?.('.travel-panel, .gallery, .lightbox') ||
-        (globeState.pointerInGlobe && globeState.travelIn > 0.55),
+        globeState.wheelOwner === 'globe',
     })
-    lenisRef.current = lenis
+    current = lenis
     let raf = 0
     const loop = (t: number) => {
       lenis.raf(t)
@@ -25,7 +33,7 @@ export function useLenis(enabled: boolean) {
     return () => {
       cancelAnimationFrame(raf)
       lenis.destroy()
-      lenisRef.current = null
+      if (current === lenis) current = null
     }
   }, [enabled])
 
@@ -37,7 +45,7 @@ export function useLenis(enabled: boolean) {
       const el = document.getElementById(id)
       if (!el) return
       e.preventDefault()
-      if (lenisRef.current) lenisRef.current.scrollTo(el, { duration: 1.4 })
+      if (current) current.scrollTo(el, { duration: 1.4 })
       else el.scrollIntoView()
       // keep keyboard users' focus in sync with the visual jump
       el.tabIndex = -1

@@ -1,0 +1,17 @@
+# Terrain bake venv (scripts/terrain/.venv, created by scripts/terrain/setup.sh).
+# Shared by F0 placeholders and D1-D5 bakes. Unpinned floors: pip install is idempotent.
+numpy>=2.0
+scipy>=1.13
+pillow>=10.4
+pyshp>=2.3
+tifffile>=2024.8
+imagecodecs>=2024.6
+requests>=2.32
+fonttools>=4.53
+brotli>=1.1
+opencv-python-headless>=4.10
+# used by D1 (master_build / fetchers)
+rasterio>=1.4
+pyogrio>=0.9
+shapely>=2.0
+httpx>=0.27

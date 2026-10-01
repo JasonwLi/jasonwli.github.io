@@ -1,35 +1,9 @@
-/* ————— tokens ————— */
-:root {
-  /* deep-space atlas: night-blue room, sunlit-sand accents, coral pings */
-  --bg: oklch(0.14 0.02 255);
-  --surface: oklch(0.18 0.018 250);
-  --surface-2: oklch(0.21 0.018 250);
-  --line: oklch(0.3 0.02 250);
-  --ink: oklch(0.94 0.008 85);
-  --muted: oklch(0.7 0.015 250);
-  --brass: oklch(0.8 0.09 85);
-  --brass-dim: oklch(0.58 0.06 85);
-  --brass-text: oklch(0.76 0.08 85); /* accent for running text — ≥4.5:1 on bg */
-  --ember: oklch(0.66 0.19 35);
-  --ember-bright: oklch(0.72 0.2 40);
+/*
+ * Base + browser surfaces for THE ASTROLABE. Colours, type and motion tokens
+ * live in tokens.css (imported first by main.tsx); this file only consumes them.
+ */
 
-  --font-display: 'Bricolage Grotesque Variable', system-ui, sans-serif;
-  --font-map: 'EB Garamond', Georgia, serif;
-  --font-mono: 'Fragment Mono', ui-monospace, monospace;
-
-  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
-  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-
-  /* z scale */
-  --z-canvas: 0;
-  --z-content: 1;
-  --z-nav: 10;
-  --z-sheet: 20;
-  --z-lightbox: 30;
-}
-
-/* ————— base ————— */
+/* ----- base ----- */
 * {
   margin: 0;
   padding: 0;
@@ -37,7 +11,10 @@
 }
 
 html {
-  scrollbar-color: var(--line) var(--bg);
+  background: var(--steel); /* overscroll never shows white */
+  caret-color: var(--caret);
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+  scrollbar-width: thin;
 }
 
 html.lenis,
@@ -49,19 +26,17 @@ html.lenis body {
 }
 
 body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 1rem;
-  line-height: 1.65;
+  background: var(--steel);
+  color: var(--silver);
+  font: 400 1.0625rem/1.62 var(--font-text);
+  /* prose sets text figures; Castoro's default figures are old-style */
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  font-synthesis: none; /* one weight, one italic: never a faux bold or slant */
+  font-kerning: normal;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   overflow-x: hidden;
-}
-
-::selection {
-  background: var(--brass);
-  color: var(--bg);
 }
 
 h1,
@@ -94,28 +69,108 @@ img {
   max-width: 100%;
 }
 
+/* ----- browser surfaces ----- */
+
+::selection {
+  background: var(--selection-bg);
+  color: var(--selection-fg);
+}
+
 :focus-visible {
-  outline: 2px solid var(--brass);
+  outline: 1.5px solid var(--focus);
   outline-offset: 3px;
-  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--focus-shadow);
+  border-radius: 1px;
 }
 
-/* map-label voice: geographic names in cartographic italic */
-.map-label {
-  font-family: var(--font-map);
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: 0.01em;
+input,
+textarea,
+[contenteditable] {
+  caret-color: var(--caret);
 }
 
-.mono {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  color: var(--muted);
+/* numerals: lining figures for data. Castoro ships `lnum` but no `tnum`
+   (fontTools, 2026-10-01), so live counters and readouts wrap each digit in
+   <TabularDigits> (src/ui/TabularDigits.tsx) for fixed advances. */
+.data,
+time,
+[data-num] {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.tnum-d {
+  display: inline-block;
+  min-width: 0.6em; /* widest Castoro figure is 0.581 em */
+  text-align: center;
 }
 
-/* canvas layer */
+/* data voice: periods, coordinates, stats, counters (replaces the old mono) */
+.data {
+  font-family: var(--font-text);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: var(--silver-2);
+}
+
+/* links inside running text and credits: a cut underline, never a colour change to gilt */
+.link,
+.prose a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--silver-3);
+  transition: text-decoration-color var(--t-micro) var(--ease-out-quart);
+}
+.link:hover,
+.prose a:hover {
+  text-decoration-color: var(--silver);
+}
+
+/* scrollbars: a cut slot, not a pill. Chromium uses scrollbar-color/-width
+   above; Safari reads the WebKit pseudo-elements. */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scroll-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border: 2px solid var(--scroll-track);
+  border-radius: 0;
+  transition: background-color var(--t-micro) var(--ease-out-quart);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-thumb-hover);
+}
+/* the travel panel variant: 6px on the column plate */
+.travel-panel,
+.scroll-panel {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) var(--steel-field);
+}
+.travel-panel::-webkit-scrollbar,
+.scroll-panel::-webkit-scrollbar {
+  width: 6px;
+}
+.travel-panel::-webkit-scrollbar-track,
+.scroll-panel::-webkit-scrollbar-track {
+  background: var(--steel-field);
+}
+.travel-panel::-webkit-scrollbar-thumb,
+.scroll-panel::-webkit-scrollbar-thumb {
+  border: 1px solid var(--steel-field);
+}
+
+/* the instrument and the crest are drawings, not text */
+.instrument,
+.crest {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ----- layers ----- */
 .globe-canvas {
   position: fixed;
   inset: 0;
@@ -137,6 +192,30 @@ main .footer,
 main section > header,
 main [data-interactive] {
   pointer-events: auto;
+}
+
+/* ----- forced colors: drop the incise underlays and the instrument; strokes become CanvasText ----- */
+@media (forced-colors: active) {
+  .instrument,
+  .incise {
+    display: none;
+  }
+  /* svg-qualified so they outrank the tone classes in art.css */
+  svg [stroke],
+  svg .art-stroke {
+    stroke: CanvasText;
+  }
+  svg .art-fill {
+    fill: CanvasText;
+  }
+  svg .is-active-mark,
+  .is-active-mark {
+    fill: Highlight;
+  }
+  :focus-visible {
+    outline-color: Highlight;
+    box-shadow: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

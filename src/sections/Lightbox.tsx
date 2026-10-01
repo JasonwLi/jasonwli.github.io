@@ -1,14 +1,25 @@
 import { useEffect, useRef } from 'react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { AnimatePresence, m, useReducedMotion } from 'motion/react'
 import { countryName, photoUrl } from '../data/travel'
 import { useSite } from '../state/store'
+import { Dot, Icons } from '../art'
+import { TabularDigits } from '../ui/TabularDigits'
 
+/**
+ * The lightbox (theme spec): flat --steel-deep at 97% (no glass), the
+ * photograph in a 1 px --line frame, drawn icons (no typed glyphs), and no
+ * gilt anywhere: the photograph owns the frame. Escape, arrows, the focus trap,
+ * focus restore and wheel containment are kept; phones step by swipe.
+ */
 export function Lightbox() {
   const lightbox = useSite((s) => s.lightbox)
   const setLightbox = useSite((s) => s.setLightbox)
   const reduce = useReducedMotion()
   const dialogRef = useRef<HTMLDivElement>(null)
   const returnFocus = useRef<HTMLElement | null>(null)
+  const swipe = useRef<{ x: number; y: number; id: number } | null>(null)
+  /** a swipe must not also count as the backdrop click that closes the viewer */
+  const swiped = useRef(false)
 
   const step = (dir: 1 | -1) => {
     const lb = useSite.getState().lightbox
@@ -53,19 +64,31 @@ export function Lightbox() {
 
   // focus in on open, restore on close
   const open = !!lightbox
+  const lastIndex = useRef(0)
+  if (lightbox) lastIndex.current = lightbox.index
   useEffect(() => {
     if (open) {
-      returnFocus.current = document.activeElement as HTMLElement
+      // record the opener once (a re-run must not record the viewer's own close button)
+      const act = document.activeElement as HTMLElement | null
+      if (act && !act.closest('.lightbox')) returnFocus.current = act
       dialogRef.current?.querySelector<HTMLElement>('.lightbox-close')?.focus()
     } else {
-      returnFocus.current?.focus({ preventScroll: true })
+      const back = returnFocus.current
+      returnFocus.current = null
+      if (back?.isConnected && !back.closest('.lightbox')) back.focus({ preventScroll: true })
+      // the opener can be gone (the gallery followed the viewer to another photo):
+      // land on the photograph now showing, never on <body>
+      if (!back || document.activeElement !== back) {
+        const photos = document.querySelectorAll<HTMLElement>('button.photo')
+        ;(photos[lastIndex.current] ?? photos[0])?.focus({ preventScroll: true })
+      }
     }
   }, [open])
 
   return (
     <AnimatePresence>
       {lightbox && (
-        <motion.div
+        <m.div
           ref={dialogRef}
           className="lightbox"
           role="dialog"
@@ -74,47 +97,65 @@ export function Lightbox() {
           initial={reduce ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={reduce ? undefined : { opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          onClick={() => setLightbox(null)}
+          transition={{ duration: reduce ? 0.12 : 0.24 }}
+          onClick={() => {
+            if (swiped.current) swiped.current = false
+            else setLightbox(null)
+          }}
+          onPointerDown={(e) => {
+            if (e.pointerType !== 'mouse') swipe.current = { x: e.clientX, y: e.clientY, id: e.pointerId }
+          }}
+          onPointerUp={(e) => {
+            const s0 = swipe.current
+            swipe.current = null
+            if (!s0 || s0.id !== e.pointerId) return
+            const dx = e.clientX - s0.x
+            if (Math.abs(dx) >= 40 && Math.abs(dx) > Math.abs(e.clientY - s0.y)) {
+              swiped.current = true
+              step(dx < 0 ? 1 : -1)
+            }
+          }}
           data-lenis-prevent
         >
           <button
-            className="lightbox-close"
+            type="button"
+            className="icon-btn lightbox-close"
             aria-label="Close photo viewer"
             onClick={(e) => {
               e.stopPropagation()
               setLightbox(null)
             }}
           >
-            ✕
+            <Icons.Close />
           </button>
-          <motion.img
+          <m.img
             key={lightbox.index}
+            className="lightbox-photo"
             src={photoUrl(lightbox.location, lightbox.location.photos[lightbox.index])}
-            alt={`${lightbox.location.name}, ${countryName(lightbox.location.cc)} — photograph ${lightbox.index + 1} of ${lightbox.location.photos.length}`}
-            initial={reduce ? false : { opacity: 0, scale: 0.985 }}
+            alt={`${lightbox.location.name}, ${countryName(lightbox.location.cc)}: photograph ${lightbox.index + 1} of ${lightbox.location.photos.length}`}
+            style={{ backgroundImage: `url(${lightbox.location.photos[lightbox.index].blur})` }}
+            initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.985 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: reduce ? 0.12 : 0.42, ease: [0.22, 1, 0.36, 1] }}
             onClick={(e) => e.stopPropagation()}
           />
           <div className="lightbox-bar" onClick={(e) => e.stopPropagation()}>
-            <button className="lightbox-nav" aria-label="Previous photo" onClick={() => step(-1)}>
-              ‹
+            <button type="button" className="icon-btn lightbox-nav" aria-label="Previous photo" onClick={() => step(-1)}>
+              <Icons.Prev />
             </button>
             <p className="lightbox-caption">
-              <span className="map-label">
-                {lightbox.location.name}, {countryName(lightbox.location.cc)}
-              </span>
-              <span className="mono">
-                {' '}
-                · {lightbox.index + 1}/{lightbox.location.photos.length}
+              <span className="lightbox-place">{lightbox.location.name}</span>,{' '}
+              <span className="lightbox-country">{countryName(lightbox.location.cc)}</span>
+              <Dot />
+              <span className="data lightbox-count">
+                <TabularDigits>{`${lightbox.index + 1} / ${lightbox.location.photos.length}`}</TabularDigits>
               </span>
             </p>
-            <button className="lightbox-nav" aria-label="Next photo" onClick={() => step(1)}>
-              ›
+            <button type="button" className="icon-btn lightbox-nav" aria-label="Next photo" onClick={() => step(1)}>
+              <Icons.Next />
             </button>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   )

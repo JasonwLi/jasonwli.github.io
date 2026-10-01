@@ -1,0 +1,559 @@
+{
+ "package": "D4",
+ "generated": "2026-10-01",
+ "generator": "scripts/terrain/bake_detail.py",
+ "layer_order": [
+  "forest",
+  "jungle",
+  "grass",
+  "farm",
+  "steppe",
+  "desert",
+  "rock",
+  "marsh",
+  "ice"
+ ],
+ "licence_summary": "All photo sources CC0 1.0 (Poly Haven, ambientCG). Procedural layers are original.",
+ "credit": {
+  "id": "detail",
+  "text": "Poly Haven / ambientCG (CC0)"
+ },
+ "process": {
+  "work_size": 1024,
+  "luminance": "Rec.709 on linearised sRGB",
+  "hipass": "Y / gaussian(Y, sigma=work/8, wrap)",
+  "normalise": {
+   "mean": 0.5,
+   "std": 0.11,
+   "clamp": [
+    0.2,
+    0.8
+   ]
+  },
+  "soften": "wrap bilateral radius 3, sigma_s 2, sigma_r 0.06 (at 1024), then renormalise",
+  "resize": "exact area average 1024->512, 1024->256, each renormalised",
+  "seam_metric": "seam_excess = mean|wrap pair diff| - mean|interior neighbour diff| (max over axes); pass if |x| < 0.02",
+  "png": "8-bit gray-in-RGB, no alpha, no colour chunks"
+ },
+ "layers": [
+  {
+   "index": 0,
+   "name": "forest",
+   "provider": "ambientcg",
+   "id": "Moss002",
+   "author": "ambientCG (Lennart Demes / Struffel Productions)",
+   "why": "clumped moss grain over a procedural tree-crown stipple (brief P1 'canopy stipple')",
+   "method": "hybrid",
+   "url": "https://ambientcg.com/get?file=Moss002_1K-JPG.zip",
+   "page": "https://ambientcg.com/view?id=Moss002",
+   "licence": "CC0",
+   "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "source_sha256": "727d4e3134f60483",
+   "motif": "crowns",
+   "motif_weight": 0.5,
+   "presmooth_sigma_px": 1.6,
+   "seam_1024": {
+    "wrap_mean": 0.013395655900239944,
+    "interior_mean": 0.012498310767114162,
+    "seam_excess": 0.002024485729634762,
+    "ok": true
+   },
+   "seam_repaired": false,
+   "sizes": {
+    "512": {
+     "file": "scripts/data/bake/detail/detail_512_00.png",
+     "mean": 0.5,
+     "std": 0.11,
+     "min": 0.2,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.025271261110901833,
+      "interior_mean": 0.023677172139286995,
+      "seam_excess": 0.0034505724906921387,
+      "ok": true
+     },
+     "bytes": 206017
+    },
+    "256": {
+     "file": "scripts/data/bake/detail/detail_256_00.png",
+     "mean": 0.5,
+     "std": 0.11,
+     "min": 0.2,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.0412159226834774,
+      "interior_mean": 0.03876851499080658,
+      "seam_excess": 0.005059972405433655,
+      "ok": true
+     },
+     "bytes": 66532
+    }
+   }
+  },
+  {
+   "index": 1,
+   "name": "jungle",
+   "provider": "ambientcg",
+   "id": "Moss004",
+   "author": "ambientCG (Lennart Demes / Struffel Productions)",
+   "why": "denser moss grain over smaller, merged procedural crowns = closed tropical canopy",
+   "method": "hybrid",
+   "url": "https://ambientcg.com/get?file=Moss004_1K-JPG.zip",
+   "page": "https://ambientcg.com/view?id=Moss004",
+   "licence": "CC0",
+   "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "source_sha256": "5426a7aa38d5383f",
+   "motif": "crowns_dense",
+   "motif_weight": 0.45,
+   "presmooth_sigma_px": 1.3,
+   "seam_1024": {
+    "wrap_mean": 0.013733964413404465,
+    "interior_mean": 0.014847378246486187,
+    "seam_excess": -0.001015455462038517,
+    "ok": true
+   },
+   "seam_repaired": false,
+   "sizes": {
+    "512": {
+     "file": "scripts/data/bake/detail/detail_512_01.png",
+     "mean": 0.5,
+     "std": 0.11,
+     "min": 0.2,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.025315139442682266,
+      "interior_mean": 0.02763345092535019,
+      "seam_excess": -0.0022039953619241714,
+      "ok": true
+     },
+     "bytes": 223959
+    },
+    "256": {
+     "file": "scripts/data/bake/detail/detail_256_01.png",
+     "mean": 0.5,
+     "std": 0.11,
+     "min": 0.2,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.03958404064178467,
+      "interior_mean": 0.0442298986017704,
+      "seam_excess": -0.004047058522701263,
+      "ok": true
+     },
+     "bytes": 69388
+    }
+   }
+  },
+  {
+   "index": 2,
+   "name": "grass",
+   "provider": "polyhaven",
+   "id": "grass_ground",
+   "author": "Charlotte Baglioni",
+   "why": "soft low-contrast meadow mottling",
+   "method": "photo",
+   "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grass_ground/grass_ground_diff_1k.jpg",
+   "page": "https://polyhaven.com/a/grass_ground",
+   "licence": "CC0",
+   "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "source_sha256": "a79cc5ed65af0f80",
+   "motif": null,
+   "motif_weight": 0.0,
+   "presmooth_sigma_px": 1.0,
+   "seam_1024": {
+    "wrap_mean": 0.021458003669977188,
+    "interior_mean": 0.02327675372362137,
+    "seam_excess": -0.0015117619186639786,
+    "ok": true
+   },
+   "seam_repaired": false,
+   "sizes": {
+    "512": {
+     "file": "scripts/data/bake/detail/detail_512_02.png",
+     "mean": 0.5,
+     "std": 0.11,
+     "min": 0.2,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.038006290793418884,
+      "interior_mean": 0.04151023179292679,
+      "seam_excess": -0.003424331545829773,
+      "ok": true
+     },
+     "bytes": 268871
+    },
+    "256": {
+     "file": "scripts/data/bake/detail/detail_256_02.png",
+     "mean": 0.5,
+     "std": 0.11,
+     "min": 0.2,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.05598212778568268,
+      "interior_mean": 0.060558564960956573,
+      "seam_excess": -0.0028636157512664795,
+      "ok": true
+     },
+     "bytes": 80690
+    }
+   }
+  },
+  {
+   "index": 3,
+   "name": "farm",
+   "provider": "polyhaven",
+   "id": "farm_furrows",
+   "author": "Amal Kumar",
+   "why": "ploughed-furrow grain, laid into a procedural field patchwork so it reads as fields",
+   "method": "hybrid",
+   "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/farm_furrows/farm_furrows_diff_1k.jpg",
+   "page": "https://polyhaven.com/a/farm_furrows",
+   "licence": "CC0",
+   "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "source_sha256": "991caba24cc555a9",
+   "motif": "fields",
+   "motif_weight": 0.75,
+   "presmooth_sigma_px": 0.8,
+   "seam_1024": {
+    "wrap_mean": 0.011197749525308609,
+    "interior_mean": 0.010151257738471031,
+    "seam_excess": 0.002416534349322319,
+    "ok": true
+   },
+   "seam_repaired": false,
+   "sizes": {
+    "512": {
+     "file": "scripts/data/bake/detail/detail_512_03.png",
+     "mean": 0.5,
+     "std": 0.11,
+     "min": 0.2,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.020219586789608,
+      "interior_mean": 0.018271902576088905,
+      "seam_excess": 0.004448920488357544,
+      "ok": true
+     },
+     "bytes": 190610
+    },
+    "256": {
+     "file": "scripts/data/bake/detail/detail_256_03.png",
+     "mean": 0.5,
+     "std": 0.11,
+     "min": 0.2,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.034534752368927,
+      "interior_mean": 0.031249921768903732,
+      "seam_excess": 0.007220916450023651,
+      "ok": true
+     },
+     "bytes": 62376
+    }
+   }
+  },
+  {
+   "index": 4,
+   "name": "steppe",
+   "provider": "polyhaven",
+   "id": "rocky_terrain_02",
+   "author": "Amal Kumar",
+   "why": "aerial (drone) open grassland with scattered stone clusters",
+   "method": "photo",
+   "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rocky_terrain_02/rocky_terrain_02_diff_1k.jpg",
+   "page": "https://polyhaven.com/a/rocky_terrain_02",
+   "licence": "CC0",
+   "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "source_sha256": "d570c10b1d5302f4",
+   "motif": null,
+   "motif_weight": 0.0,
+   "presmooth_sigma_px": 0.8,
+   "seam_1024": {
+    "wrap_mean": 0.02523183263838291,
+    "interior_mean": 0.028376366943120956,
+    "seam_excess": -0.0018816478550434113,
+    "ok": true
+   },
+   "seam_repaired": false,
+   "sizes": {
+    "512": {
+     "file": "scripts/data/bake/detail/detail_512_04.png",
+     "mean": 0.4999,
+     "std": 0.1099,
+     "min": 0.2,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.046222031116485596,
+      "interior_mean": 0.050701141357421875,
+      "seam_excess": -0.0013983026146888733,
+      "ok": true
+     },
+     "bytes": 317250
+    },
+    "256": {
+     "file": "scripts/data/bake/detail/detail_256_04.png",
+     "mean": 0.4999,
+     "std": 0.1098,
+     "min": 0.2,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.06599023938179016,
+      "interior_mean": 0.0734306052327156,
+      "seam_excess": -0.004224695265293121,
+      "ok": true
+     },
+     "bytes": 95551
+    }
+   }
+  },
+  {
+   "index": 5,
+   "name": "desert",
+   "provider": "polyhaven",
+   "id": "aerial_beach_01",
+   "author": "Rob Tuytel",
+   "why": "aerial wind ripples, overlaid on procedural ridged dunes for map-scale dune crests",
+   "method": "hybrid",
+   "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/aerial_beach_01/aerial_beach_01_diff_1k.jpg",
+   "page": "https://polyhaven.com/a/aerial_beach_01",
+   "licence": "CC0",
+   "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "source_sha256": "5b849983d08fda1c",
+   "motif": "dunes",
+   "motif_weight": 0.7,
+   "presmooth_sigma_px": 0.8,
+   "seam_1024": {
+    "wrap_mean": 0.00851702131330967,
+    "interior_mean": 0.0085492804646492,
+    "seam_excess": 0.002140650525689125,
+    "ok": true
+   },
+   "seam_repaired": false,
+   "sizes": {
+    "512": {
+     "file": "scripts/data/bake/detail/detail_512_05.png",
+     "mean": 0.5,
+     "std": 0.11,
+     "min": 0.251,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.016893764957785606,
+      "interior_mean": 0.01627105101943016,
+      "seam_excess": 0.004616555757820606,
+      "ok": true
+     },
+     "bytes": 175923
+    },
+    "256": {
+     "file": "scripts/data/bake/detail/detail_256_05.png",
+     "mean": 0.5,
+     "std": 0.11,
+     "min": 0.2745,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.031187867745757103,
+      "interior_mean": 0.0273454487323761,
+      "seam_excess": 0.01066351868212223,
+      "ok": true
+     },
+     "bytes": 58432
+    }
+   }
+  },
+  {
+   "index": 6,
+   "name": "rock",
+   "provider": "polyhaven",
+   "id": "marble_cliff_02",
+   "author": "Amal Kumar",
+   "why": "aerial cracked cliff: fractured crags",
+   "method": "photo",
+   "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/marble_cliff_02/marble_cliff_02_diff_1k.jpg",
+   "page": "https://polyhaven.com/a/marble_cliff_02",
+   "licence": "CC0",
+   "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "source_sha256": "a1ca15e1b5cd7d0d",
+   "motif": null,
+   "motif_weight": 0.0,
+   "presmooth_sigma_px": 0.7,
+   "seam_1024": {
+    "wrap_mean": 0.021210115402936935,
+    "interior_mean": 0.022261733189225197,
+    "seam_excess": 0.00046408548951148987,
+    "ok": true
+   },
+   "seam_repaired": false,
+   "sizes": {
+    "512": {
+     "file": "scripts/data/bake/detail/detail_512_06.png",
+     "mean": 0.5,
+     "std": 0.11,
+     "min": 0.2588,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.03671976923942566,
+      "interior_mean": 0.038841914385557175,
+      "seam_excess": 0.00043547898530960083,
+      "ok": true
+     },
+     "bytes": 273269
+    },
+    "256": {
+     "file": "scripts/data/bake/detail/detail_256_06.png",
+     "mean": 0.5,
+     "std": 0.11,
+     "min": 0.2549,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.0543014220893383,
+      "interior_mean": 0.05701795220375061,
+      "seam_excess": -0.0004745200276374817,
+      "ok": true
+     },
+     "bytes": 81351
+    }
+   }
+  },
+  {
+   "index": 7,
+   "name": "marsh",
+   "provider": "polyhaven",
+   "id": "brown_mud_03",
+   "author": "Rob Tuytel",
+   "why": "wet mud with pooled patches; pools emphasised as dark speckle",
+   "method": "hybrid",
+   "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/brown_mud_03/brown_mud_03_diff_1k.jpg",
+   "page": "https://polyhaven.com/a/brown_mud_03",
+   "licence": "CC0",
+   "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "source_sha256": "6da4fbd6fc5d2104",
+   "motif": "pools",
+   "motif_weight": 0.35,
+   "presmooth_sigma_px": 0.9,
+   "seam_1024": {
+    "wrap_mean": 0.016041230410337448,
+    "interior_mean": 0.014713885262608528,
+    "seam_excess": 0.0030235880985856056,
+    "ok": true
+   },
+   "seam_repaired": false,
+   "sizes": {
+    "512": {
+     "file": "scripts/data/bake/detail/detail_512_07.png",
+     "mean": 0.5,
+     "std": 0.11,
+     "min": 0.2,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.028525037690997124,
+      "interior_mean": 0.02679726853966713,
+      "seam_excess": 0.0042922478169202805,
+      "ok": true
+     },
+     "bytes": 230212
+    },
+    "256": {
+     "file": "scripts/data/bake/detail/detail_256_07.png",
+     "mean": 0.5,
+     "std": 0.11,
+     "min": 0.2,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.04362330958247185,
+      "interior_mean": 0.042345114052295685,
+      "seam_excess": 0.004309255629777908,
+      "ok": true
+     },
+     "bytes": 71377
+    }
+   }
+  },
+  {
+   "index": 8,
+   "name": "ice",
+   "provider": "ambientcg",
+   "id": "Snow010A",
+   "author": "ambientCG (Lennart Demes / Struffel Productions)",
+   "why": "wind-packed snow grain, laid over procedural wind-streak sastrugi (photo alone posterises into blotches)",
+   "method": "hybrid",
+   "url": "https://ambientcg.com/get?file=Snow010A_1K-JPG.zip",
+   "page": "https://ambientcg.com/view?id=Snow010A",
+   "licence": "CC0",
+   "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "source_sha256": "06852017cc69c885",
+   "motif": "sastrugi",
+   "motif_weight": 0.55,
+   "presmooth_sigma_px": 1.0,
+   "seam_1024": {
+    "wrap_mean": 0.01734214648604393,
+    "interior_mean": 0.017807641997933388,
+    "seam_excess": 0.0002520056441426277,
+    "ok": true
+   },
+   "seam_repaired": false,
+   "sizes": {
+    "512": {
+     "file": "scripts/data/bake/detail/detail_512_08.png",
+     "mean": 0.5,
+     "std": 0.11,
+     "min": 0.2,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.024696553125977516,
+      "interior_mean": 0.02540072612464428,
+      "seam_excess": -0.0005505066365003586,
+      "ok": true
+     },
+     "bytes": 223015
+    },
+    "256": {
+     "file": "scripts/data/bake/detail/detail_256_08.png",
+     "mean": 0.5,
+     "std": 0.11,
+     "min": 0.2,
+     "max": 0.8,
+     "seam": {
+      "wrap_mean": 0.035055629909038544,
+      "interior_mean": 0.036763083189725876,
+      "seam_excess": -0.00037634745240211487,
+      "ok": true
+     },
+     "bytes": 64803
+    }
+   }
+  }
+ ],
+ "contact_sheet": "scripts/.cache/detail/contact_sheet.png",
+ "encoding": {
+  "owner": "D5",
+  "intended_command_512": "basisu -ktx2 -uastc -uastc_level 2 -uastc_rdo_l 1.0 -linear -mipmap -tex_type 2darray -output_file detail_512.ktx2 detail_512_00.png detail_512_01.png detail_512_02.png detail_512_03.png detail_512_04.png detail_512_05.png detail_512_06.png detail_512_07.png detail_512_08.png",
+  "intended_command_256": "basisu -ktx2 -uastc -uastc_level 2 -uastc_rdo_l 1.0 -linear -mipmap -tex_type 2darray -output_file detail_256.ktx2 detail_256_00.png detail_256_01.png detail_256_02.png detail_256_03.png detail_256_04.png detail_256_05.png detail_256_06.png detail_256_07.png detail_256_08.png",
+  "notes": [
+   "Verify flag names with `basisu -help` (basis_universal 2.50); keep -uastc (R10: never XUASTC/ASTC/HDR).",
+   "Input file order == layer order 00..08 == splat order; the KTX2 layer index is the splat class index.",
+   "-linear: the data is luminance in a linear 0..1 encoding, colorSpace 'none' in the manifest (NOT sRGB).",
+   "-mipmap must use wrap addressing (basisu -mip_clamp NOT set) because the layers tile.",
+   "Lossy is allowed (appearance data, ENG_PLAN R2). Gray-in-RGB: R=G=B, sample .r (or .g, best UASTC precision)."
+  ]
+ },
+ "shader": {
+  "owner": "C2b",
+  "layer_order": [
+   "forest",
+   "jungle",
+   "grass",
+   "farm",
+   "steppe",
+   "desert",
+   "rock",
+   "marsh",
+   "ice"
+  ],
+  "splat_mapping": "uSplatA=[forest,jungle,grass] -> layers 0,1,2; uSplatB=[farm,steppe,desert] -> 3,4,5; uSplatC=[rock,marsh,ice] -> 6,7,8",
+  "value": "texel .r in 0..1, mean 0.5 (per layer and per size), std 0.11, clamped to [0.2,0.8]; 0.5 = no change",
+  "suggested_apply": "albedo_lin *= mix(1.0, 2.0 * d, uDetailFade * strength) with d = weighted sum over the top-2 splat layers; this keeps the macro albedo mean (EU4 'detail modulates paint'). Re-apply land luma cap afterwards.",
+  "tiling": "seamless on both axes (wrap / RepeatWrapping). uDetailScaleKm (6, 36): one tile spans 6 km (fine octave) and 36 km (coarse octave); both octaves sample the same layer. The textures carry features from ~1/128 to ~1/4 of a tile (high-pass sigma = tile/8).",
+  "mips": "Generated by basisu with wrap; at distance the layers converge to 0.5 (neutral), which is what uDetailFade relies on.",
+  "orientation": "isotropic enough for biplanar/triplanar projection; farm stripes and desert dunes have mixed orientations per tile."
+ }
+}

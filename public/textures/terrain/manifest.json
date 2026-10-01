@@ -1,0 +1,544 @@
+{
+ "schema": "terrain-manifest/1",
+ "generated": "2026-10-01T06:30:52Z",
+ "placeholder": false,
+ "cube": {
+  "faceOrder": [
+   "px",
+   "nx",
+   "py",
+   "ny",
+   "pz",
+   "nz"
+  ],
+  "convention": "gl",
+  "rows": "row0=top; upload flipY=false",
+  "table": "s=2*(col+.5)/N-1, t=2*(row+.5)/N-1; +X(1,-t,-s) -X(-1,-t,s) +Y(s,1,t) -Y(s,-1,-t) +Z(s,-t,1) -Z(-s,-t,-1)",
+  "latLon": "lat=asin(y), lon=atan2(-z,x)"
+ },
+ "encodings": {
+  "height": {
+   "in": "terrain.r",
+   "curve": "sqrt",
+   "maxM": 9000
+  },
+  "bathy": {
+   "in": "terrain.g",
+   "curve": "sqrt",
+   "maxM": 11000
+  },
+  "coastSdf": {
+   "in": "terrain.b",
+   "zero": 0.5,
+   "halfRangeKm": 128,
+   "positive": "land"
+  },
+  "river": {
+   "in": "hydro.r",
+   "curve": "1-d/band",
+   "bandKm": 24
+  },
+  "lakeSdf": {
+   "in": "hydro.g",
+   "zero": 0.5,
+   "halfRangeKm": 64,
+   "positive": "water"
+  },
+  "snow": {
+   "in": "hydro.b",
+   "curve": "linear",
+   "permanent": 0.95
+  },
+  "heightHi": {
+   "in": "heightHi.r",
+   "curve": "sqrt",
+   "maxM": 9000
+  },
+  "koppenIdx": {
+   "in": "koppenIdx.r",
+   "scale": 8,
+   "classes": 30,
+   "ocean": 0,
+   "filter": "nearest"
+  },
+  "splat": {
+   "order": [
+    "forest",
+    "jungle",
+    "grass",
+    "farm",
+    "steppe",
+    "desert",
+    "rock",
+    "marsh",
+    "ice"
+   ],
+   "files": {
+    "splatA": [
+     0,
+     1,
+     2
+    ],
+    "splatB": [
+     3,
+     4,
+     5
+    ],
+    "splatC": [
+     6,
+     7,
+     8
+    ]
+   },
+   "sum": 1
+  },
+  "lowData": {
+   "r": "coastSdf",
+   "g": "bathy",
+   "b": "snow"
+  },
+  "treeDensity": {
+   "r": "conifer",
+   "g": "broadleaf",
+   "b": "palm"
+  },
+  "heightGrid": {
+   "type": "uint16le",
+   "unit": "m",
+   "land": ">=0",
+   "ocean": 0,
+   "rows": "row0=north",
+   "cellCentres": "lon=-180+(i+.5)*360/w, lat=90-(j+.5)*180/h"
+  }
+ },
+ "preview": {
+  "albedo": {
+   "url": "shared/preview_albedo_1024x512.webp?v=f7ce5aff",
+   "kind": "equirect",
+   "w": 1024,
+   "h": 512,
+   "format": "webp",
+   "lossless": false,
+   "colorSpace": "srgb",
+   "bytes": 36798
+  },
+  "data": {
+   "url": "shared/preview_data_1024x512.webp?v=20609d1c",
+   "kind": "equirect",
+   "w": 1024,
+   "h": 512,
+   "format": "webp",
+   "lossless": true,
+   "colorSpace": "none",
+   "packs": "lowData",
+   "bytes": 312498
+  }
+ },
+ "tiers": {
+  "low": {
+   "kind": "equirect",
+   "minViewKm": 1200,
+   "layers": {
+    "albedo": {
+     "url": "low/albedo_2048x1024.webp?v=1b64887a",
+     "w": 2048,
+     "h": 1024,
+     "format": "webp",
+     "lossless": false,
+     "colorSpace": "srgb",
+     "bytes": 182596
+    },
+    "data": {
+     "url": "low/data_2048x1024.webp?v=8049aa7c",
+     "w": 2048,
+     "h": 1024,
+     "format": "webp",
+     "lossless": true,
+     "colorSpace": "none",
+     "packs": "lowData",
+     "bytes": 1009774
+    },
+    "koppenColor": {
+     "url": "low/koppen_color_2048x1024.webp?v=a772b8de",
+     "w": 2048,
+     "h": 1024,
+     "format": "webp",
+     "lossless": false,
+     "colorSpace": "srgb",
+     "bytes": 111728
+    }
+   }
+  },
+  "mid": {
+   "kind": "cube",
+   "minViewKm": 500,
+   "layers": {
+    "albedo": {
+     "url": "mid/albedo_1280.ktx2?v=a6c9e677",
+     "format": "ktx2",
+     "codec": "uastc",
+     "type": "cube",
+     "faceSize": 1280,
+     "mips": true,
+     "colorSpace": "srgb",
+     "bytes": 3164280
+    },
+    "terrain": {
+     "faces": [
+      "mid/terrain_768_px.webp?v=456bee34",
+      "mid/terrain_768_nx.webp?v=829d05f8",
+      "mid/terrain_768_py.webp?v=f707536e",
+      "mid/terrain_768_ny.webp?v=75fa2756",
+      "mid/terrain_768_pz.webp?v=cbf33c72",
+      "mid/terrain_768_nz.webp?v=e805433a"
+     ],
+     "format": "webp",
+     "lossless": true,
+     "faceSize": 768,
+     "colorSpace": "none",
+     "mips": "runtime",
+     "bytes": 1817246
+    },
+    "hydro": {
+     "faces": [
+      "mid/hydro_512_px.webp?v=48b6b996",
+      "mid/hydro_512_nx.webp?v=9f93936c",
+      "mid/hydro_512_py.webp?v=fc8a2c25",
+      "mid/hydro_512_ny.webp?v=c1788347",
+      "mid/hydro_512_pz.webp?v=d3afa31b",
+      "mid/hydro_512_nz.webp?v=74ab996d"
+     ],
+     "format": "webp",
+     "lossless": true,
+     "faceSize": 512,
+     "colorSpace": "none",
+     "bytes": 358008
+    },
+    "splatA": {
+     "faces": [
+      "mid/splatA_512_px.webp?v=bfe4939a",
+      "mid/splatA_512_nx.webp?v=4412b061",
+      "mid/splatA_512_py.webp?v=9a82c82d",
+      "mid/splatA_512_ny.webp?v=4a2ed8b7",
+      "mid/splatA_512_pz.webp?v=129b3670",
+      "mid/splatA_512_nz.webp?v=aa1cc72c"
+     ],
+     "format": "webp",
+     "lossless": true,
+     "faceSize": 512,
+     "colorSpace": "none",
+     "bytes": 357808
+    },
+    "splatB": {
+     "faces": [
+      "mid/splatB_512_px.webp?v=ec9d94ad",
+      "mid/splatB_512_nx.webp?v=a64a115e",
+      "mid/splatB_512_py.webp?v=e6dbee93",
+      "mid/splatB_512_ny.webp?v=7d6617c5",
+      "mid/splatB_512_pz.webp?v=1a530ee3",
+      "mid/splatB_512_nz.webp?v=48c3f10b"
+     ],
+     "format": "webp",
+     "lossless": true,
+     "faceSize": 512,
+     "colorSpace": "none",
+     "bytes": 281296
+    },
+    "splatC": {
+     "faces": [
+      "mid/splatC_512_px.webp?v=9476dad5",
+      "mid/splatC_512_nx.webp?v=55e51837",
+      "mid/splatC_512_py.webp?v=0b761bd0",
+      "mid/splatC_512_ny.webp?v=d8017e38",
+      "mid/splatC_512_pz.webp?v=d5cdce04",
+      "mid/splatC_512_nz.webp?v=9b58a251"
+     ],
+     "format": "webp",
+     "lossless": true,
+     "faceSize": 512,
+     "colorSpace": "none",
+     "bytes": 84432
+    },
+    "detail": {
+     "url": "mid/detail_256.ktx2?v=24767c02",
+     "format": "ktx2",
+     "codec": "uastc",
+     "type": "2darray",
+     "layers": 9,
+     "size": 256,
+     "mips": true,
+     "colorSpace": "none",
+     "bytes": 688391
+    },
+    "koppenIdx": {
+     "faces": [
+      "mid/koppen_idx_512_px.png?v=1119543a",
+      "mid/koppen_idx_512_nx.png?v=c197d315",
+      "mid/koppen_idx_512_py.png?v=85ea9768",
+      "mid/koppen_idx_512_ny.png?v=af5b7961",
+      "mid/koppen_idx_512_pz.png?v=fee3830a",
+      "mid/koppen_idx_512_nz.png?v=640b28c4"
+     ],
+     "format": "png",
+     "lossless": true,
+     "faceSize": 512,
+     "colorSpace": "none",
+     "filter": "nearest",
+     "upload": "R8",
+     "bytes": 98017
+    }
+   }
+  },
+  "high": {
+   "kind": "cube",
+   "minViewKm": 300,
+   "layers": {
+    "albedo": {
+     "url": "high/albedo_2048.ktx2?v=712e4286",
+     "format": "ktx2",
+     "codec": "uastc",
+     "type": "cube",
+     "faceSize": 2048,
+     "mips": true,
+     "colorSpace": "srgb",
+     "bytes": 7918741
+    },
+    "terrain": {
+     "faces": [
+      "high/terrain_1024_px.webp?v=a33920e2",
+      "high/terrain_1024_nx.webp?v=1bfaf4d6",
+      "high/terrain_1024_py.webp?v=8037eb30",
+      "high/terrain_1024_ny.webp?v=b02ca7ef",
+      "high/terrain_1024_pz.webp?v=187d14c2",
+      "high/terrain_1024_nz.webp?v=695ef8ef"
+     ],
+     "format": "webp",
+     "lossless": true,
+     "faceSize": 1024,
+     "colorSpace": "none",
+     "mips": "runtime",
+     "bytes": 3136870
+    },
+    "hydro": {
+     "faces": [
+      "high/hydro_768_px.webp?v=df5669f9",
+      "high/hydro_768_nx.webp?v=d98699a0",
+      "high/hydro_768_py.webp?v=b94b61d0",
+      "high/hydro_768_ny.webp?v=92ce6eb4",
+      "high/hydro_768_pz.webp?v=1a95e781",
+      "high/hydro_768_nz.webp?v=011b5b2c"
+     ],
+     "format": "webp",
+     "lossless": true,
+     "faceSize": 768,
+     "colorSpace": "none",
+     "bytes": 694162
+    },
+    "heightHi": {
+     "faces": [
+      "high/heightHi_2048_px.webp?v=e33787a1",
+      "high/heightHi_2048_nx.webp?v=4410b4cf",
+      "high/heightHi_2048_py.webp?v=12994d8b",
+      "high/heightHi_2048_ny.webp?v=95c807f7",
+      "high/heightHi_2048_pz.webp?v=0a62c3e3",
+      "high/heightHi_2048_nz.webp?v=4e2b7ca1"
+     ],
+     "format": "webp",
+     "lossless": true,
+     "faceSize": 2048,
+     "colorSpace": "none",
+     "upload": "R8",
+     "bytes": 2701214
+    },
+    "splatA": {
+     "faces": [
+      "mid/splatA_512_px.webp?v=bfe4939a",
+      "mid/splatA_512_nx.webp?v=4412b061",
+      "mid/splatA_512_py.webp?v=9a82c82d",
+      "mid/splatA_512_ny.webp?v=4a2ed8b7",
+      "mid/splatA_512_pz.webp?v=129b3670",
+      "mid/splatA_512_nz.webp?v=aa1cc72c"
+     ],
+     "format": "webp",
+     "lossless": true,
+     "faceSize": 512,
+     "colorSpace": "none",
+     "bytes": 357808
+    },
+    "splatB": {
+     "faces": [
+      "mid/splatB_512_px.webp?v=ec9d94ad",
+      "mid/splatB_512_nx.webp?v=a64a115e",
+      "mid/splatB_512_py.webp?v=e6dbee93",
+      "mid/splatB_512_ny.webp?v=7d6617c5",
+      "mid/splatB_512_pz.webp?v=1a530ee3",
+      "mid/splatB_512_nz.webp?v=48c3f10b"
+     ],
+     "format": "webp",
+     "lossless": true,
+     "faceSize": 512,
+     "colorSpace": "none",
+     "bytes": 281296
+    },
+    "splatC": {
+     "faces": [
+      "mid/splatC_512_px.webp?v=9476dad5",
+      "mid/splatC_512_nx.webp?v=55e51837",
+      "mid/splatC_512_py.webp?v=0b761bd0",
+      "mid/splatC_512_ny.webp?v=d8017e38",
+      "mid/splatC_512_pz.webp?v=d5cdce04",
+      "mid/splatC_512_nz.webp?v=9b58a251"
+     ],
+     "format": "webp",
+     "lossless": true,
+     "faceSize": 512,
+     "colorSpace": "none",
+     "bytes": 84432
+    },
+    "detail": {
+     "url": "high/detail_512.ktx2?v=eed17f06",
+     "format": "ktx2",
+     "codec": "uastc",
+     "type": "2darray",
+     "layers": 9,
+     "size": 512,
+     "mips": true,
+     "colorSpace": "none",
+     "bytes": 2502618
+    },
+    "koppenIdx": {
+     "faces": [
+      "high/koppen_idx_1024_px.png?v=7514c932",
+      "high/koppen_idx_1024_nx.png?v=56ed8b49",
+      "high/koppen_idx_1024_py.png?v=cf99b3e8",
+      "high/koppen_idx_1024_ny.png?v=71d1e2b2",
+      "high/koppen_idx_1024_pz.png?v=12effec1",
+      "high/koppen_idx_1024_nz.png?v=755ad39e"
+     ],
+     "format": "png",
+     "lossless": true,
+     "faceSize": 1024,
+     "colorSpace": "none",
+     "filter": "nearest",
+     "upload": "R8",
+     "bytes": 294586
+    }
+   }
+  }
+ },
+ "shared": {
+  "labels": {
+   "url": "shared/labels.json?v=17720bd9",
+   "bytes": 115907
+  },
+  "rivers": {
+   "url": "shared/rivers.json?v=b2d151fc",
+   "bytes": 1164920
+  },
+  "heightGrid": {
+   "url": "shared/height_2048x1024.webp?v=1e15b26a",
+   "w": 2048,
+   "h": 1024,
+   "format": "webp",
+   "bytes": 675102
+  },
+  "treeDensity": {
+   "url": "shared/trees_4096x2048.webp?v=c2ee9182",
+   "w": 4096,
+   "h": 2048,
+   "lossless": true,
+   "colorSpace": "none",
+   "bytes": 867712
+  }
+ },
+ "stages": {
+  "low": {
+   "A": [
+    "preview.albedo",
+    "preview.data"
+   ],
+   "B": [
+    "tiers.low.albedo",
+    "tiers.low.data",
+    "shared.labels"
+   ],
+   "C": [
+    "shared.rivers"
+   ],
+   "onDemand": [
+    "tiers.low.koppenColor"
+   ]
+  },
+  "mid": {
+   "A": [
+    "preview.albedo",
+    "preview.data"
+   ],
+   "B": [
+    "tiers.mid.albedo",
+    "tiers.mid.terrain",
+    "tiers.mid.hydro",
+    "shared.labels"
+   ],
+   "C": [
+    "tiers.mid.splatA",
+    "tiers.mid.splatB",
+    "tiers.mid.splatC",
+    "tiers.mid.detail",
+    "shared.heightGrid",
+    "shared.rivers",
+    "shared.treeDensity"
+   ],
+   "onDemand": [
+    "tiers.mid.koppenIdx"
+   ]
+  },
+  "high": {
+   "A": [
+    "preview.albedo",
+    "preview.data"
+   ],
+   "B": [
+    "tiers.high.albedo",
+    "tiers.high.terrain",
+    "tiers.high.hydro",
+    "shared.labels"
+   ],
+   "C": [
+    "tiers.high.splatA",
+    "tiers.high.splatB",
+    "tiers.high.splatC",
+    "tiers.high.detail",
+    "shared.heightGrid",
+    "shared.rivers",
+    "shared.treeDensity",
+    "tiers.high.heightHi"
+   ],
+   "onDemand": [
+    "tiers.high.koppenIdx"
+   ]
+  }
+ },
+ "credits": [
+  {
+   "id": "etopo",
+   "text": "ETOPO 2022, NOAA NCEI"
+  },
+  {
+   "id": "ne",
+   "text": "Natural Earth"
+  },
+  {
+   "id": "modis",
+   "text": "MODIS MCD12Q1 via NASA GIBS"
+  },
+  {
+   "id": "koppen",
+   "text": "Beck et al. 2023, Köppen-Geiger 1991-2020, CC BY 4.0"
+  },
+  {
+   "id": "detail",
+   "text": "Poly Haven / ambientCG (CC0)"
+  }
+ ]
+}

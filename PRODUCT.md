@@ -22,12 +22,12 @@ Precise, expeditionary, quietly confident. Never braggy; the globe does the talk
 
 ## Structure
 
-Single scrolling page, one continuous 3D scene:
+Single scrolling page over one fixed 3D scene, themed as a Renaissance astrolabe (heat-blued steel, gilt engraved scales, silver text, vermilion for the active place):
 
-1. **Hero** — planetarium: luminous dot-matrix globe with glowing pings, name + role overlaid.
-2. **Flight log (work)** — expedition-log timeline of roles + selected projects. Globe recedes/dims behind it.
-3. **The globe (travel)** — full-viewport interactive globe: drag to rotate, click a ping → camera flies there → gallery of up to 5 scenery photos + place name, country, dates. Location index for direct navigation.
-4. **Footer** — email, GitHub, LinkedIn.
+1. **Hero** — engraved name crest and tagline upper-left; the globe sits in an engraved degree limb that turns with it.
+2. **The work** — an engraved gazetteer table of roles (dates and places, company, role, one-line summary).
+3. **The globe (travel)** — an EU4-painterly terrain globe with Terrain / Climate (Köppen) map modes, lettered region and sea names, 3D monuments, rivers and trees; drag to spin, deep zoom with a slight tilt (the limb gives way to a map neatline). A left place index (grouped by country) swaps in place to the gallery of up to 5 scenery photos with place name, country, coordinates and dates; choosing a place swings a vermilion alidade to it. On phones the globe holds the top band and the gallery is a peek sheet that expands to full screen. Photos open in a lightbox.
+4. **Footer** — contact plate (email, GitHub, LinkedIn) and data/type credits.
 
 ## Data
 

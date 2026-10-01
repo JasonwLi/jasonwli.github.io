@@ -1,0 +1,543 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-01T08:03:20.066415+00:00",
+  "title": "Design System: jasonli.world",
+  "extensions": {
+    "colorMeta": {
+      "steel": {
+        "role": "neutral",
+        "displayName": "Heat-Blued Steel",
+        "canonical": "oklch(0.225 0.088 260)",
+        "hex": "#011844",
+        "tonalRamp": [
+          "oklch(0.15 0.088 260)",
+          "oklch(0.26 0.088 260)",
+          "oklch(0.37 0.088 260)",
+          "oklch(0.48 0.088 260)",
+          "oklch(0.60 0.088 260)",
+          "oklch(0.71 0.088 260)",
+          "oklch(0.83 0.088 260)",
+          "oklch(0.95 0.03 260)"
+        ]
+      },
+      "steel-deep": {
+        "role": "neutral",
+        "displayName": "Deep Steel",
+        "canonical": "oklch(0.185 0.072 262)",
+        "hex": "#021032",
+        "tonalRamp": [
+          "oklch(0.15 0.072 262)",
+          "oklch(0.26 0.072 262)",
+          "oklch(0.37 0.072 262)",
+          "oklch(0.48 0.072 262)",
+          "oklch(0.60 0.072 262)",
+          "oklch(0.71 0.072 262)",
+          "oklch(0.83 0.072 262)",
+          "oklch(0.95 0.03 262)"
+        ]
+      },
+      "steel-field": {
+        "role": "neutral",
+        "displayName": "Field Steel",
+        "canonical": "oklch(0.26 0.088 258)",
+        "hex": "#03224d",
+        "tonalRamp": [
+          "oklch(0.15 0.088 258)",
+          "oklch(0.26 0.088 258)",
+          "oklch(0.37 0.088 258)",
+          "oklch(0.48 0.088 258)",
+          "oklch(0.60 0.088 258)",
+          "oklch(0.71 0.088 258)",
+          "oklch(0.83 0.088 258)",
+          "oklch(0.95 0.03 258)"
+        ]
+      },
+      "steel-raised": {
+        "role": "neutral",
+        "displayName": "Raised Steel",
+        "canonical": "oklch(0.288 0.082 257)",
+        "hex": "#0c2a52",
+        "tonalRamp": [
+          "oklch(0.15 0.082 257)",
+          "oklch(0.26 0.082 257)",
+          "oklch(0.37 0.082 257)",
+          "oklch(0.48 0.082 257)",
+          "oklch(0.60 0.082 257)",
+          "oklch(0.71 0.082 257)",
+          "oklch(0.83 0.082 257)",
+          "oklch(0.95 0.03 257)"
+        ]
+      },
+      "incise": {
+        "role": "neutral",
+        "displayName": "Incise",
+        "canonical": "oklch(0.125 0.04 264)",
+        "hex": "#020516",
+        "tonalRamp": [
+          "oklch(0.15 0.04 264)",
+          "oklch(0.26 0.04 264)",
+          "oklch(0.37 0.04 264)",
+          "oklch(0.48 0.04 264)",
+          "oklch(0.60 0.04 264)",
+          "oklch(0.71 0.04 264)",
+          "oklch(0.83 0.04 264)",
+          "oklch(0.95 0.03 264)"
+        ]
+      },
+      "gilt": {
+        "role": "primary",
+        "displayName": "Fire-Gilt Brass",
+        "canonical": "oklch(0.8 0.115 84)",
+        "hex": "#e1b761",
+        "tonalRamp": [
+          "oklch(0.15 0.115 84)",
+          "oklch(0.26 0.115 84)",
+          "oklch(0.37 0.115 84)",
+          "oklch(0.48 0.115 84)",
+          "oklch(0.60 0.115 84)",
+          "oklch(0.71 0.115 84)",
+          "oklch(0.83 0.115 84)",
+          "oklch(0.95 0.03 84)"
+        ]
+      },
+      "gilt-2": {
+        "role": "primary",
+        "displayName": "Tempered Brass",
+        "canonical": "oklch(0.66 0.095 80)",
+        "hex": "#b18c4a",
+        "tonalRamp": [
+          "oklch(0.15 0.095 80)",
+          "oklch(0.26 0.095 80)",
+          "oklch(0.37 0.095 80)",
+          "oklch(0.48 0.095 80)",
+          "oklch(0.60 0.095 80)",
+          "oklch(0.71 0.095 80)",
+          "oklch(0.83 0.095 80)",
+          "oklch(0.95 0.03 80)"
+        ]
+      },
+      "gilt-worn": {
+        "role": "primary",
+        "displayName": "Worn Brass",
+        "canonical": "oklch(0.45 0.06 75)",
+        "hex": "#69502e",
+        "tonalRamp": [
+          "oklch(0.15 0.06 75)",
+          "oklch(0.26 0.06 75)",
+          "oklch(0.37 0.06 75)",
+          "oklch(0.48 0.06 75)",
+          "oklch(0.60 0.06 75)",
+          "oklch(0.71 0.06 75)",
+          "oklch(0.83 0.06 75)",
+          "oklch(0.95 0.03 75)"
+        ]
+      },
+      "silver": {
+        "role": "neutral",
+        "displayName": "Silver",
+        "canonical": "oklch(0.92 0.008 250)",
+        "hex": "#e1e5ea",
+        "tonalRamp": [
+          "oklch(0.15 0.008 250)",
+          "oklch(0.26 0.008 250)",
+          "oklch(0.37 0.008 250)",
+          "oklch(0.48 0.008 250)",
+          "oklch(0.60 0.008 250)",
+          "oklch(0.71 0.008 250)",
+          "oklch(0.83 0.008 250)",
+          "oklch(0.95 0.008 250)"
+        ]
+      },
+      "silver-2": {
+        "role": "neutral",
+        "displayName": "Silver Two",
+        "canonical": "oklch(0.78 0.014 252)",
+        "hex": "#b1b8c0",
+        "tonalRamp": [
+          "oklch(0.15 0.014 252)",
+          "oklch(0.26 0.014 252)",
+          "oklch(0.37 0.014 252)",
+          "oklch(0.48 0.014 252)",
+          "oklch(0.60 0.014 252)",
+          "oklch(0.71 0.014 252)",
+          "oklch(0.83 0.014 252)",
+          "oklch(0.95 0.014 252)"
+        ]
+      },
+      "silver-3": {
+        "role": "neutral",
+        "displayName": "Silver Three",
+        "canonical": "oklch(0.66 0.018 255)",
+        "hex": "#8b939d",
+        "tonalRamp": [
+          "oklch(0.15 0.018 255)",
+          "oklch(0.26 0.018 255)",
+          "oklch(0.37 0.018 255)",
+          "oklch(0.48 0.018 255)",
+          "oklch(0.60 0.018 255)",
+          "oklch(0.71 0.018 255)",
+          "oklch(0.83 0.018 255)",
+          "oklch(0.95 0.018 255)"
+        ]
+      },
+      "vermilion": {
+        "role": "secondary",
+        "displayName": "Vermilion",
+        "canonical": "oklch(0.64 0.205 33)",
+        "hex": "#ee4b2b",
+        "tonalRamp": [
+          "oklch(0.15 0.205 33)",
+          "oklch(0.26 0.205 33)",
+          "oklch(0.37 0.205 33)",
+          "oklch(0.48 0.205 33)",
+          "oklch(0.60 0.205 33)",
+          "oklch(0.71 0.205 33)",
+          "oklch(0.83 0.205 33)",
+          "oklch(0.95 0.03 33)"
+        ]
+      },
+      "vermilion-hi": {
+        "role": "secondary",
+        "displayName": "Hot Vermilion",
+        "canonical": "oklch(0.7 0.18 36)",
+        "hex": "#f96d47",
+        "tonalRamp": [
+          "oklch(0.15 0.18 36)",
+          "oklch(0.26 0.18 36)",
+          "oklch(0.37 0.18 36)",
+          "oklch(0.48 0.18 36)",
+          "oklch(0.60 0.18 36)",
+          "oklch(0.71 0.18 36)",
+          "oklch(0.83 0.18 36)",
+          "oklch(0.95 0.03 36)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Steel Line",
+        "canonical": "oklch(0.38 0.058 257)",
+        "hex": "#2e4361",
+        "tonalRamp": [
+          "oklch(0.15 0.058 257)",
+          "oklch(0.26 0.058 257)",
+          "oklch(0.37 0.058 257)",
+          "oklch(0.48 0.058 257)",
+          "oklch(0.60 0.058 257)",
+          "oklch(0.71 0.058 257)",
+          "oklch(0.83 0.058 257)",
+          "oklch(0.95 0.03 257)"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Steel Rule",
+        "canonical": "oklch(0.46 0.048 256)",
+        "hex": "#465973",
+        "tonalRamp": [
+          "oklch(0.15 0.048 256)",
+          "oklch(0.26 0.048 256)",
+          "oklch(0.37 0.048 256)",
+          "oklch(0.48 0.048 256)",
+          "oklch(0.60 0.048 256)",
+          "oklch(0.71 0.048 256)",
+          "oklch(0.83 0.048 256)",
+          "oklch(0.95 0.03 256)"
+        ]
+      },
+      "focus": {
+        "role": "neutral",
+        "displayName": "Focus Gilt",
+        "canonical": "oklch(0.86 0.13 86)",
+        "hex": "#f7cb65",
+        "tonalRamp": [
+          "oklch(0.15 0.13 86)",
+          "oklch(0.26 0.13 86)",
+          "oklch(0.37 0.13 86)",
+          "oklch(0.48 0.13 86)",
+          "oklch(0.60 0.13 86)",
+          "oklch(0.71 0.13 86)",
+          "oklch(0.83 0.13 86)",
+          "oklch(0.95 0.03 86)"
+        ]
+      },
+      "selection-bg": {
+        "role": "neutral",
+        "displayName": "Tempered Selection",
+        "canonical": "oklch(0.4 0.075 256)",
+        "hex": "#2b496f",
+        "tonalRamp": [
+          "oklch(0.15 0.075 256)",
+          "oklch(0.26 0.075 256)",
+          "oklch(0.37 0.075 256)",
+          "oklch(0.48 0.075 256)",
+          "oklch(0.60 0.075 256)",
+          "oklch(0.71 0.075 256)",
+          "oklch(0.83 0.075 256)",
+          "oklch(0.95 0.03 256)"
+        ]
+      },
+      "label-land": {
+        "role": "neutral",
+        "displayName": "Umber Ink",
+        "canonical": "oklch(0.26 0.04 60)",
+        "hex": "#321f0f",
+        "tonalRamp": [
+          "oklch(0.15 0.04 60)",
+          "oklch(0.26 0.04 60)",
+          "oklch(0.37 0.04 60)",
+          "oklch(0.48 0.04 60)",
+          "oklch(0.60 0.04 60)",
+          "oklch(0.71 0.04 60)",
+          "oklch(0.83 0.04 60)",
+          "oklch(0.95 0.03 60)"
+        ]
+      },
+      "label-sea": {
+        "role": "neutral",
+        "displayName": "Sea Ink",
+        "canonical": "oklch(0.85 0.03 230)",
+        "hex": "#bbd2de",
+        "tonalRamp": [
+          "oklch(0.15 0.03 230)",
+          "oklch(0.26 0.03 230)",
+          "oklch(0.37 0.03 230)",
+          "oklch(0.48 0.03 230)",
+          "oklch(0.60 0.03 230)",
+          "oklch(0.71 0.03 230)",
+          "oklch(0.83 0.03 230)",
+          "oklch(0.95 0.03 230)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The hero name only, gilt engraved capitals."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section headings on one engraved rule."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Open place name in the gallery."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running text, work summaries, tagline; old-style figures."
+      },
+      "data": {
+        "displayName": "Data",
+        "purpose": "Periods, coordinates, stats, counters; lining figures."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Nav, contact actions, map-mode options, index group labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "incise-groove",
+        "value": "offset (-0.5px, -0.5px) stroke in var(--incise) under every cut line",
+        "purpose": "The only depth device: an engraved groove, lit from upper left."
+      },
+      {
+        "name": "engraved-name",
+        "value": "text-shadow: 0 -0.75px 0 var(--incise)",
+        "purpose": "Hard groove wall on the gilt hero name; no blur."
+      },
+      {
+        "name": "paint-halo",
+        "value": "-webkit-text-stroke / SVG stroke in var(--incise), paint-order: stroke fill",
+        "purpose": "Holds silver and gilt lettering over the painted globe."
+      },
+      {
+        "name": "focus-ring",
+        "value": "outline: 1.5px solid var(--focus); outline-offset: 3px; box-shadow: 0 0 0 1px var(--incise)",
+        "purpose": "Keyboard focus everywhere."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-burin",
+        "value": "cubic-bezier(0.45, 0, 0.2, 1)",
+        "purpose": "Draw-on of engraved cuts and scales."
+      },
+      {
+        "name": "ease-out-quart",
+        "value": "cubic-bezier(0.25, 1, 0.5, 1)",
+        "purpose": "State changes: colour, hover fill, index slide, sheet."
+      },
+      {
+        "name": "ease-out-quint",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Hero tagline rise."
+      },
+      {
+        "name": "t-micro",
+        "value": "160ms",
+        "purpose": "Hover and colour transitions."
+      },
+      {
+        "name": "t-panel",
+        "value": "360ms",
+        "purpose": "Column plate fade."
+      },
+      {
+        "name": "t-engrave",
+        "value": "900ms",
+        "purpose": "Scale and cut draw-on on arrival."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "860px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Engraved Nav Ruler",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Fixed top-right ruler: Titling words over major ticks, a gilt fiducial under the current section.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link\" href=\"#\">WORK</a><a class=\"ds-nav-link is-current\" href=\"#\">TRAVEL</a><a class=\"ds-nav-link\" href=\"#\">CONTACT</a><svg class=\"ds-nav-rule\" width=\"264\" height=\"16\" viewBox=\"0 0 264 16\"><path d=\"M0.5,0.5H264\" stroke=\"var(--incise)\" transform=\"translate(-0.5,-0.5)\"/><path d=\"M0,0.5H264M44,0.5v11M132,0.5v15M220,0.5v11\" stroke=\"var(--gilt-2)\" fill=\"none\"/><path d=\"M128.5,16L132,10L135.5,16Z\" fill=\"var(--gilt)\"/></svg></nav>",
+      "css": ".ds-nav{position:relative;display:grid;grid-template-columns:repeat(3,88px);background:var(--steel);padding:8px 0 20px}.ds-nav-link{display:flex;justify-content:center;height:44px;padding:11px 0 0 0.18em;font:400 12px/14px var(--font-title);letter-spacing:0.18em;color:var(--silver-2);text-decoration:none;transition:color var(--t-micro) var(--ease-out-quart)}.ds-nav-link:hover,.ds-nav-link.is-current{color:var(--silver)}.ds-nav-link:focus-visible{outline:1.5px solid var(--focus);outline-offset:3px;box-shadow:0 0 0 1px var(--incise)}.ds-nav-rule{position:absolute;left:0;top:32px}"
+    },
+    {
+      "name": "Contact Action",
+      "kind": "button",
+      "refersTo": "contact-button",
+      "description": "Unfilled icon plus tracked Titling label; colour shifts silver-2 to silver.",
+      "html": "<a class=\"ds-contact\" href=\"#\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 22 22\" fill=\"none\"><path d=\"M3,5H19V17H3ZM3.5,6L11,12L18.5,6\" stroke=\"var(--incise)\" stroke-width=\"1.25\" transform=\"translate(-0.5,-0.5)\"/><path d=\"M3,5H19V17H3ZM3.5,6L11,12L18.5,6\" stroke=\"currentColor\" stroke-width=\"1.25\" stroke-linejoin=\"miter\"/></svg><span>EMAIL</span></a>",
+      "css": ".ds-contact{display:inline-flex;align-items:center;gap:10px;height:44px;color:var(--silver-2);text-decoration:none;font:400 12px/1 var(--font-title);letter-spacing:0.18em;transition:color var(--t-micro) var(--ease-out-quart)}.ds-contact span{padding-left:0.18em}.ds-contact:hover{color:var(--silver)}.ds-contact:active{transform:translateY(0.5px)}.ds-contact:focus-visible{outline:1.5px solid var(--focus);outline-offset:3px;box-shadow:0 0 0 1px var(--incise)}"
+    },
+    {
+      "name": "Icon Button",
+      "kind": "button",
+      "refersTo": "icon-button",
+      "description": "44px square, grooved 1.25px strokes; globe zoom and reset controls, close, prev/next.",
+      "html": "<button class=\"ds-icon-btn\" aria-label=\"Zoom in\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M12.5,7A5.5,5.5 0 1 1 1.5,7A5.5,5.5 0 1 1 12.5,7M11,11L14.5,14.5M4.5,7H9.5M7,4.5V9.5\" stroke=\"var(--incise)\" stroke-width=\"1.25\" transform=\"translate(-0.5,-0.5)\"/><path d=\"M12.5,7A5.5,5.5 0 1 1 1.5,7A5.5,5.5 0 1 1 12.5,7M11,11L14.5,14.5M4.5,7H9.5M7,4.5V9.5\" stroke=\"currentColor\" stroke-width=\"1.25\"/></svg></button>",
+      "css": ".ds-icon-btn{display:inline-grid;place-items:center;width:44px;height:44px;border:0;background:none;color:var(--silver-2);cursor:pointer;transition:color var(--t-micro) var(--ease-out-quart)}.ds-icon-btn:hover{color:var(--silver)}.ds-icon-btn:active{transform:translateY(0.5px)}.ds-icon-btn:disabled{color:var(--silver-3)}.ds-icon-btn:focus-visible{outline:1.5px solid var(--focus);outline-offset:3px;box-shadow:0 0 0 1px var(--incise)}"
+    },
+    {
+      "name": "Text Link",
+      "kind": "button",
+      "refersTo": "text-button",
+      "description": "Running-text and retry links: a cut underline that brightens, never a colour change to gilt.",
+      "html": "<p class=\"ds-prose\">Relief from <a class=\"ds-link\" href=\"#\">ETOPO 2022, NOAA NCEI</a>.</p>",
+      "css": ".ds-prose{font:400 13px/1.5 var(--font-text);color:var(--silver-3);background:var(--steel);padding:12px}.ds-link{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:var(--silver-3);transition:color var(--t-micro) var(--ease-out-quart),text-decoration-color var(--t-micro) var(--ease-out-quart)}.ds-link:hover{color:var(--silver);text-decoration-color:var(--silver)}.ds-link:focus-visible{outline:1.5px solid var(--focus);outline-offset:3px}"
+    },
+    {
+      "name": "Place Index",
+      "kind": "custom",
+      "refersTo": "place-row",
+      "description": "Country group label plus 36px rows; flat steel-raised hover, dotted leader, vermilion star-pointer on the active row.",
+      "html": "<div class=\"ds-index\"><div class=\"ds-country\">JAPAN <span>6</span></div><button class=\"ds-row is-active\"><span class=\"ds-gut\"><svg width=\"10\" height=\"14\" viewBox=\"0 0 10 14\"><path d=\"M5,0.5L9,9A4,4 0 1 1 1,9Z\" fill=\"var(--vermilion)\" stroke=\"var(--incise)\"/><circle cx=\"5\" cy=\"9.6\" r=\"1.4\" fill=\"var(--steel-field)\"/></svg></span><span class=\"ds-name\">Kyoto</span><span class=\"ds-lead\"></span><span class=\"ds-n\">3</span></button><button class=\"ds-row\"><span class=\"ds-gut\"></span><span class=\"ds-name\">Tokyo</span><span class=\"ds-lead\"></span><span class=\"ds-n\">5</span></button><button class=\"ds-row is-empty\"><span class=\"ds-gut\"></span><span class=\"ds-name\">Narita</span><span class=\"ds-lead\"></span><span class=\"ds-n\">&ndash;</span></button></div>",
+      "css": ".ds-index{width:340px;background:var(--steel);padding:8px}.ds-country{display:flex;gap:10px;padding:6px 0 6px 16px;border-bottom:1px solid var(--line);font:400 12px/1.2 var(--font-title);letter-spacing:0.16em;color:var(--silver-2)}.ds-country span{font:400 13px var(--font-text);letter-spacing:0;color:var(--silver-3)}.ds-row{width:100%;height:36px;display:flex;align-items:center;padding:0 8px 0 0;border:0;background:none;color:var(--silver);font:400 16px/1.35 var(--font-text);text-align:left;cursor:pointer;transition:background-color var(--t-micro) var(--ease-out-quart)}.ds-gut{flex:none;width:16px;display:flex;justify-content:center}.ds-lead{flex:1;margin:6px 8px 0;border-top:1px dotted var(--silver-3);opacity:0}.ds-n{font-size:13px;color:var(--silver-3)}.ds-row:hover,.ds-row:focus-visible{background:var(--steel-raised);outline:none}.ds-row:hover .ds-lead,.ds-row:focus-visible .ds-lead{opacity:0.6}.ds-row.is-empty .ds-name{color:var(--silver-2)}"
+    },
+    {
+      "name": "Map Mode Scale",
+      "kind": "chip",
+      "refersTo": "map-mode-option",
+      "description": "Terrain / Climate radios standing over an engraved ruler with a sliding gilt index.",
+      "html": "<div class=\"ds-mode\" role=\"radiogroup\"><button class=\"ds-mode-opt is-selected\" role=\"radio\" aria-checked=\"true\">TERRAIN</button><button class=\"ds-mode-opt\" role=\"radio\" aria-checked=\"false\">CLIMATE</button><svg class=\"ds-mode-rule\" width=\"216\" height=\"14\" viewBox=\"0 0 216 14\" fill=\"none\"><path d=\"M0,7.5H216M54,7.5v-7M162,7.5v-7\" stroke=\"var(--gilt-2)\"/><path d=\"M50.5,14L54,8.5L57.5,14Z\" fill=\"var(--gilt)\"/></svg></div>",
+      "css": ".ds-mode{position:relative;width:216px;height:58px;background:var(--steel);display:grid;grid-template-columns:1fr 1fr}.ds-mode-opt{height:44px;padding:5px 0 0;border:0;background:none;font:400 12px/14px var(--font-title);letter-spacing:0.16em;color:var(--silver-3);cursor:pointer;transition:color var(--t-micro) var(--ease-out-quart)}.ds-mode-opt:hover{color:var(--silver-2)}.ds-mode-opt.is-selected{color:var(--silver)}.ds-mode-opt:focus-visible{outline:1.5px solid var(--focus);outline-offset:3px;box-shadow:0 0 0 1px var(--incise)}.ds-mode-rule{position:absolute;left:0;bottom:0}"
+    },
+    {
+      "name": "Photo Frame",
+      "kind": "card",
+      "refersTo": "photo-frame",
+      "description": "Photograph mounted in a 3px passe-partout inside a 1px steel line; the line brightens on hover.",
+      "html": "<a class=\"ds-photo\" href=\"#\"><span class=\"ds-plate\"></span></a>",
+      "css": ".ds-photo{display:block;width:280px;padding:3px;border:1px solid var(--line);border-radius:1px;background:var(--steel);transition:border-color var(--t-micro) var(--ease-out-quart)}.ds-photo:hover{border-color:var(--silver-3)}.ds-photo:focus-visible{outline:1.5px solid var(--focus);outline-offset:3px}.ds-plate{display:block;aspect-ratio:4/3;background:var(--steel-deep)}"
+    },
+    {
+      "name": "Section Heading",
+      "kind": "custom",
+      "refersTo": "",
+      "description": "Titling capitals in silver on one engraved gilt rule; nothing above it.",
+      "html": "<div class=\"ds-head\"><h2>THE WORK</h2><svg width=\"220\" height=\"3\" viewBox=\"0 0 220 3\"><path d=\"M0,1H220\" stroke=\"var(--incise)\"/><path d=\"M0.5,1.5H220\" stroke=\"var(--gilt-worn)\"/></svg></div>",
+      "css": ".ds-head{background:var(--steel);padding:16px}.ds-head h2{margin:0 0 3px;font:400 30px/1.1 var(--font-title);letter-spacing:0.14em;color:var(--silver)}.ds-head svg{display:block}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Astrolabe",
+    "overview": "The page is one working Renaissance instrument. A heat-blued steel field owns every pixel of ground; the painted terrain globe is the instrument's sphere, held inside an engraved degree limb that turns with it; each section (the name crest, the work gazetteer, the globe with its place index, the contact plate) is a plate of the same instrument. Fire-gilt brass appears only where a craftsman would cut it: hairlines, degree scales, tick marks, one crest filigree and the engraved capitals of the name. Every word a person reads is silver. Vermilion is reserved for the one active place: the alidade blade that swings to it, the star-pointer in the index, the active pin core.\n\nDensity is low and deliberate. The steel is flat (no gradient, noise, sheen, vignette, glass or glow anywhere in the DOM), and depth comes from engraving, not lighting: every cut is a flat line laid over a darker incise groove offset half a pixel toward the lower right, as if lit from the upper left. The globe follows the same single upper-left key light. The world refuses parchment-and-blackletter pastiche and gilt game-menu bevels; it is an instrument, not a costume.\n\nThe globe itself is EU4-painterly: a sea continuing the steel family (OKLab L about 0.34, hue 240-250), land painted from a fixed biome palette under a hard luminance cap, with region names lettered on the map, monuments, rivers and trees appearing with zoom, and a Terrain / Climate map mode switch.",
+    "keyCharacteristics": [
+      "Flat heat-blued steel ground; tonal steel steps, never shadows, separate surfaces.",
+      "Gilt is line, never fill and never running text (the hero name's engraved capitals are the one text exception).",
+      "Silver for all reading text in three steps; vermilion for the single active place only.",
+      "One type family, Castoro, in two cuts (Titling capitals and text), regular weight only.",
+      "Engraved draw-on motion: scales and cuts draw along their own path with a burin ease.",
+      "Square corners; 44px touch targets; underlined text links, never colour-change links."
+    ],
+    "rules": [
+      {
+        "name": "The One Active Place Rule",
+        "body": "Vermilion marks the single place currently chosen, and nothing else. No vermilion on hover, decoration, links or emphasis.",
+        "section": "colors"
+      },
+      {
+        "name": "The Brass Is Cut Rule",
+        "body": "Gilt appears only as a stroke (hairline, tick, numeral, filigree) or the engraved name. It never fills a surface and never sets a sentence.",
+        "section": "colors"
+      },
+      {
+        "name": "The Silver Reads Rule",
+        "body": "If a person reads it, it is silver, silver-2 or silver-3; every pair is checked against WCAG by `scripts/check-contrast.mjs`.",
+        "section": "colors"
+      },
+      {
+        "name": "The Twin Token Rule",
+        "body": "`src/styles/tokens.css` (OKLCH) is the DOM source and `src/theme/tokens.ts` (sRGB hex) is its three.js twin; they agree within 1 LSB (`scripts/check-tokens.mjs`). Globe-only paint (sea ramp, snow, monument tones) lives in `src/three/terrain/look.ts`, the land albedo in `scripts/terrain/palette.json`, the Köppen classes in `src/data/koppen-palette.json`.",
+        "section": "colors"
+      },
+      {
+        "name": "The Painted Land Cap Rule",
+        "body": "Painted land never exceeds OKLab L 0.66 after lighting in either map mode (snow and ice cap at 0.86), so silver lettering and gilt scales always outrank the paint.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Weight Rule",
+        "body": "Regular weight only, with `font-synthesis: none`. Hierarchy comes from cut (Titling vs text), size, tracking, italic and silver step; never bold.",
+        "section": "typography"
+      },
+      {
+        "name": "The Two Figures Rule",
+        "body": "Prose sets old-style figures; data sets lining figures.",
+        "section": "typography"
+      },
+      {
+        "name": "The Engraved Not Lit Rule",
+        "body": "A line gains depth only from its incise groove. No drop shadows, glows, bevels, gradients or blur under UI.",
+        "section": "elevation"
+      },
+      {
+        "name": "The One Light Rule",
+        "body": "Light comes from the upper left everywhere: the incise offset, the globe's relief, the monument faces.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** keep every surface flat steel and separate surfaces with a tonal step or a 1px line.",
+      "**Do** draw brass as strokes over an incise groove offset (-0.5px, -0.5px), lit from the upper left.",
+      "**Do** set every readable word in silver, silver-2 or silver-3, regular weight, from the Castoro family.",
+      "**Do** reserve vermilion for the single active place (alidade, star-pointer, active pin).",
+      "**Do** use the shared tick module (4 / 7 / 11px on a 6px pitch) for any new scale, ruler or control boundary.",
+      "**Do** give every control a 44px target and use the shared 1.5px focus-gilt ring with a 3px offset.",
+      "**Do** add a globe colour in both `tokens.css` and `tokens.ts` (or in `look.ts` / `palette.json` if it is paint only) and keep painted land under OKLab L 0.66."
+    ],
+    "donts": [
+      "**Don't** fill a surface with gilt or set running text in gilt; the hero name is the one engraved-capitals exception.",
+      "**Don't** use gradients, noise, sheen, vignettes, glass, glows, bevels or drop shadows anywhere in the DOM, and no atmosphere, rim glow or specular glint on the globe.",
+      "**Don't** use pills, rounded cards or side-stripe accents; corners stay square.",
+      "**Don't** put a kicker, eyebrow or section number above a heading; a section heading is one ruled line with nothing above it.",
+      "**Don't** use bold or synthesized weights; Castoro ships regular and italic only.",
+      "**Don't** turn links gilt or vermilion on hover; links change their underline and silver step only.",
+      "**Don't** let text sit on the globe band on phones; content starts below the 52% band.",
+      "**Don't** drift toward parchment, blackletter, beige or cream grounds, or gilt game-menu chrome."
+    ]
+  }
+}
