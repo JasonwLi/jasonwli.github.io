@@ -1,7 +1,7 @@
 /**
  * Hero model specimen (dev only, never bundled): each hero model (hero/*) beside the
  * low-poly form it replaces, with the real monument material.
- *   /src/three/monuments/dev/hero.html                     old @150 | hero @300 | @120 | @56 | @40 px
+ *   /src/three/monuments/dev/hero.html                     old @150 | hero @300 | @120 | @56 | @40 | @32 px
  *   ?only=taj-hero,eiffel-hero   just these      ?big=600   one large cell per model
  *   ?yaw=0.4 (rad, the app turns each landmark +-0.32..0.52)  ?elev=35 (deg above the ground plane)
  * px = the form's size measure (formSize: max(height, 0.7 x width, 0.5 x depth)) on screen,
@@ -114,8 +114,10 @@ heroes.forEach((h, i) => {
   draw(hero, ox + 794, oy + 2, 90, 90, 56, swatches[(i + 2) % 4])
   draw(hero, ox + 886, oy + 2, 70, 70, 40, swatches[(i + 3) % 4])
   draw(old, ox + 886, oy + 92, 70, 70, 40, swatches[(i + 3) % 4])
+  draw(hero, ox + 794, oy + 112, 60, 60, 32, swatches[i % 4])
   label('120', ox + 626, oy + 174)
   label('56', ox + 798, oy + 94)
   label('40 hero / old', ox + 830, oy + 164)
+  label('32', ox + 798, oy + 174)
 })
 ;(window as unknown as { __specimenDone: boolean }).__specimenDone = true

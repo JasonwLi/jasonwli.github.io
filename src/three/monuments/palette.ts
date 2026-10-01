@@ -53,6 +53,16 @@ export const M = {
   lawn: '#657e4b', //       oklch(0.56 0.080 130)
   forest: '#345035', //     oklch(0.40 0.055 145)
   cliff: '#746656', //      oklch(0.52 0.030 70)
+  // Great Wall / Machu Picchu legibility at 32-48 px: pale stone against darker ground
+  wallStone: '#9d9486', //  oklch(0.67 0.022 78)  the Great Wall's weathered brick-and-stone
+  wallCap: '#a29e95', //    oklch(0.70 0.014 88)  its sunlit coping, parapets and merlons
+  graniteLight: '#a09e99', // oklch(0.70 0.008 95) Machu Picchu's pale granite
+  scrub: '#34492f', //      oklch(0.38 0.050 140) dark scrub on the ridges / slopes
+  scrubDark: '#243924', //  oklch(0.32 0.045 145)
+  terrace: '#4e6640', //    oklch(0.48 0.065 135) terrace treads, a step under the stone risers
+  forestDeep: '#213625', // oklch(0.31 0.040 150) Huayna Picchu's cloud forest
+  rockDeep: '#453b33', //   oklch(0.36 0.020 60)
+  plinth: '#3a3128', //     oklch(0.32 0.020 70)  base rim and cast shadow
 } as const
 
 /** Post-light OKLab L cap for monuments (critique: <= 0.70). */

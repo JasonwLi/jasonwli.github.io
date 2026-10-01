@@ -18,7 +18,8 @@
  *    +0.5 priority and 15% looser spacing) keeps footprints >= 0.625 (pxA + pxB) apart and
  *    admits at most 14 (phones 6) at viewKm >= 4000, a budget that grows as
  *    (4000 / viewKm)^2 while zooming in; below 3000 km a hero that clashes with a placed
- *    neighbour (St Peter's beside the Colosseum) stands one spacing to its side instead.
+ *    neighbour (St Peter's beside the Colosseum) stands one spacing to its side instead
+ *    when that stays within the site cap (below), else waits.
  *    Horizon-faded (facing 0.1 -> 0.3), never past the disc edge.
  *  - CLOSE ZOOM (the C5 behaviour): every other landmark appears once its natural size
  *    (WORLD_H = 0.006 R x fame 1.15 / 0.95) reaches 30 px (slabs 56 px; hidden again under
@@ -31,7 +32,10 @@
  *    steps, the smallest displacement whose base (centre and both ends) is on land per the
  *    CPU height grid (never over open sea), with soft costs for covering other pins and
  *    for a body over water; the nudge is kept while valid and near-best and the base
- *    eases to it (110 ms). A non-hero that would move > 18 px waits. Lifted onto the
+ *    eases to it (110 ms). Never more than 35 px on screen nor 150 km on the ground from
+ *    the site (pair shifts too): with no clear spot inside that the monument stands on its
+ *    site under its pins, and the declutter (by priority) has the lower-priority one of two
+ *    that compete wait. A non-hero that would move > 18 px waits. Lifted onto the
  *    displaced terrain exactly like the pins and sunk 4% of the model so slopes never
  *    show a gap;
  *  - orientation: up = the ground normal leaned back from the viewer until the view is
@@ -117,10 +121,17 @@ const OWN_PIN_KM = 40 // pins this close to the site are the landmark's own (mus
 const NUDGE_DIRS = 8
 const BODY_WATER_PX = 5 // cost (px) of a body standing over water on a land base
 const KEEP_SLACK_PX = 6
-/** never nudged further than this on the ground (a small phone globe would park Hagia
- * Sophia in Hungary): past it the monument stands on its true site under its pin */
-const NUDGE_MAX_RAD = 500 / 6371
-const NONHERO_NUDGE_PX = 18 // a non-hero miniature displaced further than this is not drawn
+/**
+ * A monument stays visually tied to its site: never nudged (or pair-shifted) further than
+ * NUDGE_MAX_PX on screen nor NUDGE_MAX_KM on the ground (a wide view once parked Giza
+ * ~500 km south of Cairo, in the open desert). With no clear spot inside both caps the
+ * monument stands on its true site, under its pins (pins draw on top); the declutter then
+ * drops the lower-priority one of two that compete for the same spot.
+ */
+const NUDGE_MAX_PX = 35
+const NUDGE_MAX_KM = 150
+const NUDGE_MAX_RAD = NUDGE_MAX_KM / 6371
+const NONHERO_NUDGE_PX = 18 // a non-hero miniature displaced further than this is not drawn (tighter than NUDGE_MAX_PX)
 const NONHERO_NUDGE_KEEP_PX = 24
 const PAIR_KM = 3000 // below this a clashing hero may stand beside its neighbour // the previous nudge is kept while within this of the best
 const SLIDE_MS = 110
@@ -182,6 +193,8 @@ interface FrameRec {
   placed: boolean // base holds a valid placement
   bx: number // projected base (CSS px)
   by: number
+  sx: number // projected true site (CSS px)
+  sy: number
 }
 
 /** ?nudgedbg: placement notes in __globe.monuments() (items[].why, waiting) */
@@ -308,7 +321,7 @@ export function Monuments({ tier }: { tier: Tier }) {
     for (const m of meshes) group.add(m.mesh)
     const anim = infos.map(() => ({ vis: 0, dim: 0, legible: false, kept: false }))
     const frame: FrameRec[] = infos.map(() => ({
-      scale: 0, px: 0, ppu: 1, facing: 0, ok: false, wide: false, base: new THREE.Vector3(), pre: new THREE.Vector3(), side: 0, target: new THREE.Vector3(), nudged: false, why: '', placed: false, bx: 0, by: 0,
+      scale: 0, px: 0, ppu: 1, facing: 0, ok: false, wide: false, base: new THREE.Vector3(), pre: new THREE.Vector3(), side: 0, target: new THREE.Vector3(), nudged: false, why: '', placed: false, bx: 0, by: 0, sx: 0, sy: 0,
     }))
     return {
       infos, material, meshes, slots, mainSlot, wideSet, hero, slab, ownPins, group, anim, frame, ready: 0, ctx: new CameraContext(),
@@ -335,7 +348,7 @@ export function Monuments({ tier }: { tier: Tier }) {
         .map(({ info, i }) => {
           const f = parts.frame[i]
           const off = Math.round((Math.acos(Math.min(1, f.base.dot(info.dir))) * 6371))
-          return { id: info.lm.id, size: +f.px.toFixed(2), px: +(f.px * parts.anim[i].vis).toFixed(2), shown: +monumentShown[i].toFixed(3), x: Math.round(f.bx), y: Math.round(f.by), wide: f.wide, nudged: f.nudged, offKm: off, land: isLandDir(f.base), why: f.why }
+          return { id: info.lm.id, size: +f.px.toFixed(2), px: +(f.px * parts.anim[i].vis).toFixed(2), shown: +monumentShown[i].toFixed(3), x: Math.round(f.bx), y: Math.round(f.by), wide: f.wide, nudged: f.nudged, offKm: off, offPx: Math.round(Math.hypot(f.bx - f.sx, f.by - f.sy)), land: isLandDir(f.base), why: f.why }
         }),
       boxes: monumentBoxes.length / 4,
       /** wide-set landmarks not drawn, with the last placement note */
@@ -562,8 +575,11 @@ export function Monuments({ tier }: { tier: Tier }) {
       groundFrame(ctx, U, F, X)
       if (!ctx.project(U, scr)) continue
       const sx = scr[0], sy = scr[1]
-      // far enough to clear the own pin in any direction, never further
-      const maxR = Math.max(halfW, hPx) + PIN_CLEAR_PX + NUDGE_STEP_PX
+      f.sx = sx
+      f.sy = sy
+      // far enough to clear the own pin in any direction, never further, and within the
+      // site cap (NUDGE_MAX_PX on screen; NUDGE_MAX_KM on the ground, checked per step)
+      const maxR = Math.min(Math.max(halfW, hPx) + PIN_CLEAR_PX + NUDGE_STEP_PX, NUDGE_MAX_PX)
       const reach = maxR + halfW + hPx + PIN_CLEAR_PX
       near.length = 0
       for (let q = 0; q < pins.length; q += 3) {
@@ -582,7 +598,7 @@ export function Monuments({ tier }: { tier: Tier }) {
         const best = tmp.best.copy(U)
         // the previous nudge, if still clear of the own pins and on land
         let prevCost = Infinity
-        if (f.nudged && ctx.project(f.target, scr2)) {
+        if (f.nudged && f.target.dot(U) >= Math.cos(NUDGE_MAX_RAD) && ctx.project(f.target, scr2) && Math.hypot(scr2[0] - sx, scr2[1] - sy) <= NUDGE_MAX_PX) {
           const pc = pinCost(scr2[0], scr2[1], halfW, hPx, own)
           const lc = pc < Infinity && inNeat(scr2[0], scr2[1], halfW, hPx) ? landCost(f.target, halfW, hPx, ppu) : -1
           if (lc >= 0) prevCost = Math.hypot(scr2[0] - sx, scr2[1] - sy) + lc + pc
@@ -598,7 +614,7 @@ export function Monuments({ tier }: { tier: Tier }) {
             d.copy(U).multiplyScalar(ca).addScaledVector(v, sa)
             if (!ctx.project(d, scr2)) continue
             const disp = Math.hypot(scr2[0] - sx, scr2[1] - sy)
-            if (disp >= bestCost) continue
+            if (disp >= bestCost || disp > NUDGE_MAX_PX) continue
             const pc = pinCost(scr2[0], scr2[1], halfW, hPx, own)
             if (disp + pc >= bestCost || !inNeat(scr2[0], scr2[1], halfW, hPx)) continue
             const lc = landCost(d, halfW, hPx, ppu)
@@ -618,7 +634,7 @@ export function Monuments({ tier }: { tier: Tier }) {
           f.target.copy(best)
           f.nudged = best.dot(U) < 1 - 1e-12
         } else {
-          // nowhere clear on land nearby: the true site, under the pins (pins draw on top)
+          // nowhere clear on land within the caps: the true site, under the pins (pins draw on top)
           f.target.copy(U)
           f.nudged = false
         }
@@ -668,7 +684,9 @@ export function Monuments({ tier }: { tier: Tier }) {
     /**
      * A hero that clashes with a placed neighbour (St Peter's 3 km from the Colosseum)
      * stands beside it instead: shifted screen-left or -right by one spacing, on land and
-     * clear of its own pins; the side that worked last is tried first
+     * clear of its own pins, and still within the site cap (NUDGE_MAX_PX / NUDGE_MAX_KM of
+     * the true site: past it the lower-ranked one waits); the side that worked last is
+     * tried first
      */
     const pairShift = (i: number) => {
       const f = fr[i]
@@ -685,6 +703,7 @@ export function Monuments({ tier }: { tier: Tier }) {
           if (!ctx.project(d, scr)) continue
           const bx = scr[0], by = scr[1]
           if (bx < 0 || by < 0 || bx > size.width || by > size.height) continue
+          if (Math.hypot(bx - f.sx, by - f.sy) > NUDGE_MAX_PX || d.dot(infos[i].dir) < Math.cos(NUDGE_MAX_RAD)) continue
           if (!inNeat(bx, by, halfW, hPx)) continue
           // the side with its body on land wins (the last side on a tie)
           const lc = landCost(d, halfW, hPx, f.ppu)
