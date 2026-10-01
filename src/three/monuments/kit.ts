@@ -30,6 +30,8 @@ function linear(hex: string): V3 {
 export interface FormStats {
   name: string
   tris: number
+  /** triangles that carry an inverted-hull outline (<= tris; hairlines have none) */
+  hullTris: number
   /** bbox in model units: [minX, minY, minZ, maxX, maxY, maxZ] */
   box: [number, number, number, number, number, number]
 }
@@ -40,9 +42,18 @@ export class Kit {
   private out: number[] = []
   private vari: number[] = []
   private idx: number[] = []
+  /** triangles that also get an inverted-hull outline (all of them unless `hull` is off) */
+  private hidx: number[] = []
+  /**
+   * Outline switch for the primitives that follow (hero models): hairline members such as
+   * suspenders, lattice diagonals or railings set it false so they draw as fine lines,
+   * not as 2 px ink bars. Reset to true by begin().
+   */
+  hull = true
   private m = new THREE.Matrix4()
   private stack: THREE.Matrix4[] = []
   private formStart = 0
+  private hullStart = 0
   readonly forms: FormStats[] = []
   private variant = -1
 
@@ -50,16 +61,19 @@ export class Kit {
   begin(name: string): number {
     this.end()
     this.variant = this.forms.length
-    this.forms.push({ name, tris: 0, box: [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity] })
+    this.forms.push({ name, tris: 0, hullTris: 0, box: [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity] })
     this.formStart = this.idx.length
+    this.hullStart = this.hidx.length
     this.m.identity()
     this.stack.length = 0
+    this.hull = true
     return this.variant
   }
 
   private end() {
     if (this.variant < 0) return
     this.forms[this.variant].tris = (this.idx.length - this.formStart) / 3
+    this.forms[this.variant].hullTris = (this.hidx.length - this.hullStart) / 3
   }
 
   /** Push a transform: translate (x,y,z), rotate about y (rad), scale (sx,sy,sz). Pair with pop(). */
@@ -106,6 +120,7 @@ export class Kit {
         acc[k][2] += n[2]
       }
       this.idx.push(base + a, base + b, base + d)
+      if (this.hull) this.hidx.push(base + a, base + b, base + d)
     }
     const box = this.forms[this.variant].box
     P.forEach((p, k) => {
@@ -123,6 +138,26 @@ export class Kit {
       box[5] = Math.max(box[5], p[2])
     })
     return this
+  }
+
+  /** Oriented box from a to b (centre line), cross-section w (horizontal) x d. 12 tris (8 without caps). */
+  beam(a: V3, b: V3, w: number, d: number, hex: string, caps = true): this {
+    const u = new THREE.Vector3(b[0] - a[0], b[1] - a[1], b[2] - a[2]).normalize()
+    let s = new THREE.Vector3().crossVectors(u, new THREE.Vector3(0, 1, 0))
+    if (s.lengthSq() < 1e-6) s = new THREE.Vector3(1, 0, 0)
+    s.normalize()
+    const t = new THREE.Vector3().crossVectors(s, u).normalize()
+    const V: V3[] = []
+    for (const p of [a, b])
+      for (const [i, j] of [[-1, -1], [1, -1], [1, 1], [-1, 1]])
+        V.push([p[0] + (s.x * w * i + t.x * d * j) / 2, p[1] + (s.y * w * i + t.y * d * j) / 2, p[2] + (s.z * w * i + t.z * d * j) / 2])
+    const T: number[][] = []
+    for (let i = 0; i < 4; i++) {
+      const j = (i + 1) % 4
+      T.push([i, j, 4 + j], [i, 4 + j, 4 + i])
+    }
+    if (caps) T.push([0, 1, 2], [0, 2, 3], [4, 6, 5], [4, 7, 6])
+    return this.prim(V, T, hex)
   }
 
   /** Axis box, base centre (x, y0, z), size w x h x d. No bottom: 10 tris. */
@@ -295,13 +330,12 @@ export class Kit {
     vari.set(this.vari, nV)
     hull.fill(1, nV)
     const nI = this.idx.length
+    const nH = this.hidx.length
     const IndexArr = nV * 2 > 65535 ? Uint32Array : Uint16Array
-    const index = new IndexArr(nI * 2)
+    const index = new IndexArr(nH + nI)
     // hull first: drawn before the model inside the one draw call
-    for (let i = 0; i < nI; i++) {
-      index[i] = this.idx[i] + nV
-      index[nI + i] = this.idx[i]
-    }
+    for (let i = 0; i < nH; i++) index[i] = this.hidx[i] + nV
+    for (let i = 0; i < nI; i++) index[nH + i] = this.idx[i]
     const g = new THREE.BufferGeometry()
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3))
     g.setAttribute('aCol', new THREE.BufferAttribute(col, 3))

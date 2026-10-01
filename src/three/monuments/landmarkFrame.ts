@@ -8,6 +8,7 @@ import * as THREE from 'three'
 import { LANDMARKS, type Landmark, landmarkVisited } from '../../data/landmarks'
 import { locations } from '../../data/travel'
 import { meshMip, surfaceHeightM } from '../geo/meshHeight'
+import { sampleHeightM } from '../geo/heightGrid'
 
 const DEG = Math.PI / 180
 
@@ -75,32 +76,16 @@ export function landmarkInfos(): LandmarkInfo[] {
 }
 
 const tA = new THREE.Vector3()
-const tB = new THREE.Vector3()
 
 /**
- * Push a landmark direction off a coincident pin: when it lies closer than `need`
- * radians to its nearest pin it is moved onto the circle of radius `need` around the
- * pin, along `prefer` (a tangent, e.g. screen-left) or else away from the pin (a fixed
- * bearing when it sits exactly on the pin).
+ * Land test for the monument site nudge: the CPU height grid (~20 km cells, ocean = 0,
+ * land >= 0, loaded before monuments show) read bilinearly, so a point within half a cell
+ * of the coast counts as land. Land at or below sea level reads as water (none of the
+ * monument sites is).
  */
-export function clearOfPin(info: LandmarkInfo, need: number, out: THREE.Vector3, prefer?: THREE.Vector3): THREE.Vector3 {
-  out.copy(info.dir)
-  const p = info.pinDir
-  if (!p || need <= 0) return out
-  const c = Math.min(1, p.dot(info.dir))
-  if (Math.acos(c) >= need) return out
-  if (prefer) tA.copy(prefer).addScaledVector(p, -prefer.dot(p))
-  else tA.copy(info.dir).addScaledVector(p, -c)
-  if (tA.lengthSq() < 1e-12) {
-    // east/north at the pin, rotated by the landmark's bearing
-    tB.set(p.z, 0, -p.x)
-    if (tB.lengthSq() < 1e-9) tB.set(0, 0, -1)
-    tB.normalize()
-    const n = new THREE.Vector3().crossVectors(p, tB)
-    tA.copy(tB).multiplyScalar(Math.cos(info.bearing)).addScaledVector(n, Math.sin(info.bearing))
-  }
-  tA.normalize()
-  return out.copy(p).multiplyScalar(Math.cos(need)).addScaledVector(tA, Math.sin(need))
+export function isLandDir(d: THREE.Vector3): boolean {
+  const [lat, lon] = latLonOf(d)
+  return sampleHeightM(lat, lon) > 0.5
 }
 
 /**

@@ -26,6 +26,15 @@ export const GLYPH_BOX_PX = 26
 export const glyphBoxes: number[] = []
 
 /**
+ * The 3D monuments drawn this frame (Monuments, wide-view miniatures and close zoom):
+ * packed [x0, y0, x1, y1] CSS px per drawn form (a landmark's extra parts get their own
+ * box), from the projected base and top widened by half the form's width. Region and
+ * place names and the 2D glyphs keep off them. A monument dimmed under its hovered or
+ * active pin is left out (the active place's name wins).
+ */
+export const monumentBoxes: number[] = []
+
+/**
  * The instrument readout's box (T1c overlay, CSS px) while it is shown: region and
  * place names yield to it (at deep zoom it hangs over the paint from the top edge).
  */

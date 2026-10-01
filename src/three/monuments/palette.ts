@@ -36,6 +36,23 @@ export const M = {
   white: '#9b9fa3', //      oklch(0.70 0.008 250)
   dark: '#262f38', //       oklch(0.30 0.020 250)
   wood: '#634632', //       oklch(0.42 0.050 55)
+  // hero models (hero/*): same rules, L <= 0.70, no gilt, no vermilion
+  rose: '#a7675a', //       oklch(0.58 0.085 32)  Petra's rose sandstone
+  roseLight: '#b9846c', //  oklch(0.66 0.075 45)  the carved, sun-washed facade
+  travertine: '#a39a88', // oklch(0.69 0.028 85)
+  granite: '#755d53', //    oklch(0.50 0.035 45)  Opera House podium
+  patina: '#63988c', //     oklch(0.64 0.060 178) Liberty's copper
+  khmer: '#7d776a', //      oklch(0.57 0.020 85)  Angkor sandstone
+  khmerDark: '#5e574c', //  oklch(0.46 0.020 80)
+  anston: '#9f8c6d', //     oklch(0.65 0.050 80)  Westminster limestone
+  plaster: '#ac7d62', //    oklch(0.63 0.070 52)  Hagia Sophia's buff-rose render
+  volcanic: '#5e473f', //   oklch(0.42 0.035 40)  Fuji's bare upper slopes
+  incaStone: '#89867e', //  oklch(0.62 0.012 90)
+  lead: '#6c7378', //       oklch(0.55 0.012 240) lead domes
+  soapstone: '#a09f95', //  oklch(0.70 0.014 100)
+  lawn: '#657e4b', //       oklch(0.56 0.080 130)
+  forest: '#345035', //     oklch(0.40 0.055 145)
+  cliff: '#746656', //      oklch(0.52 0.030 70)
 } as const
 
 /** Post-light OKLab L cap for monuments (critique: <= 0.70). */

@@ -6,8 +6,9 @@
  * travelIn > 0.35 and viewKm is between 1000 and 6000 (LOW has no 3D monuments, so its
  * band runs down to its 1200 km floor), no visited brightness, never vermilion.
  * Finish review: the hand-off to the 3D monuments is per landmark — a glyph stays until
- * its own 3D form is legible (Monuments' minimum on-screen size, monumentShown), so no
- * landmark is drawn as a sub-legible 3D crumb and none blinks out between the layers.
+ * its own 3D form is drawn (monumentShown: the wide-view miniature set at any zoom, the
+ * rest once legible), so no landmark is drawn twice and none blinks out between the
+ * layers. Glyphs also keep off every drawn miniature's footprint (monumentBoxes).
  *
  * One instanced screen-space quad per landmark (one draw call): 26 px, anchored at the
  * lifted surface point (LIFT.glyph + terrain) with a 4 px lift; CPU horizon fade;
@@ -27,7 +28,7 @@ import { LIFT } from '../geo/radii'
 import { smoothstep } from '../lod'
 import { registerDebug } from '../debugHooks'
 import { GLYPH_PATHS } from './glyphPaths'
-import { GLYPH_BOX_PX, glyphBoxes } from '../instrument/screenObstacles'
+import { GLYPH_BOX_PX, glyphBoxes, monumentBoxes } from '../instrument/screenObstacles'
 import { CameraContext, groundM, isCoarsePointer, landmarkInfos, monumentShown } from './landmarkFrame'
 
 const GLYPH_PX = GLYPH_BOX_PX
@@ -269,6 +270,11 @@ export function LandmarkGlyphs() {
         if (cx < -GLYPH_PX || cy < -GLYPH_PX || cx > size.width + GLYPH_PX || cy > size.height + GLYPH_PX) continue
         let clash = false
         for (const [bx, by] of boxes) if (Math.abs(bx - cx) < GLYPH_PX + 4 && Math.abs(by - cy) < GLYPH_PX + 4) clash = true
+        // never under / against a drawn 3D miniature
+        const hg = GLYPH_PX / 2 + 3
+        for (let q = 0; !clash && q + 3 < monumentBoxes.length; q += 4) {
+          if (cx + hg > monumentBoxes[q] && cx - hg < monumentBoxes[q + 2] && cy + hg > monumentBoxes[q + 1] && cy - hg < monumentBoxes[q + 3]) clash = true
+        }
         if (clash) continue
         boxes.push([cx, cy])
         // labels yield to placed glyphs (published for C4's declutter)

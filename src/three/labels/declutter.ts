@@ -13,7 +13,7 @@
  */
 import * as THREE from 'three'
 import { globeState } from '../globeState'
-import { GLYPH_BOX_PX, drawnRoute, glyphBoxes, neatGuard, readoutBox } from '../instrument/screenObstacles'
+import { GLYPH_BOX_PX, drawnRoute, glyphBoxes, monumentBoxes, neatGuard, readoutBox } from '../instrument/screenObstacles'
 import { instrumentLayout } from '../instrument/anchors'
 
 /** route segments fainter than this at both ends are not obstacles */
@@ -208,7 +208,7 @@ const _b = [0, 0, 0]
 
 /**
  * Add the pins (kind 0), the drawn route (kind 1, front-facing segments), the placed
- * landmark glyphs (rects), the neatline's scale numerals (rects), the readout and the
+ * landmark glyphs and the drawn 3D monuments (rects), the neatline's scale numerals (rects), the readout and the
  * alidade hairline (kind 2) as obstacles. Clearances are chosen per query.
  */
 export function addInstrumentObstacles(occ: Occupancy, inner: THREE.Object3D, camera: THREE.Camera): void {
@@ -241,6 +241,10 @@ export function addInstrumentObstacles(occ: Occupancy, inner: THREE.Object3D, ca
   const h = GLYPH_BOX_PX / 2
   for (let i = 0; i + 1 < glyphBoxes.length; i += 2) {
     occ.addRect({ x0: glyphBoxes[i] - h, y0: glyphBoxes[i + 1] - h, x1: glyphBoxes[i] + h, y1: glyphBoxes[i + 1] + h })
+  }
+  // the 3D monuments as drawn (wide-view miniatures and close zoom): names keep off them
+  for (let i = 0; i + 3 < monumentBoxes.length; i += 4) {
+    occ.addRect({ x0: monumentBoxes[i], y0: monumentBoxes[i + 1], x1: monumentBoxes[i + 2], y1: monumentBoxes[i + 3] })
   }
   // the neatline's scale numerals (deep zoom)
   if (neatGuard.on) {

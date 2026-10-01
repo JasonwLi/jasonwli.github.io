@@ -7,12 +7,14 @@
  * - ids unique, archetypes valid, every form/part form exists, all 15 archetypes used;
  * - every landmark within 60 km of a travel location carries a near_place, and every
  *   near_place is a travel slug; prints the visited count;
- * - every form is 30-300 model triangles (the hull outline doubles it).
+ * - every low-poly form is 30-300 model triangles, every hero model (monuments/hero/) 400-3,000
+ *   (the hull outline roughly doubles it), and every hero is registered and used by its landmark.
  * Exit 1 on any failure.
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { ARCHETYPES, LANDMARKS, VISITED_KM, landmarkVisited, nearestPlace } from '../../../data/landmarks.ts'
 import { ARCHETYPE_FORMS, buildArchetype } from '../archetypes.ts'
+import { HEROES, HERO_FORM_NAMES } from '../hero/index.ts'
 
 const errs: string[] = []
 const fail = (m: string) => errs.push(m)
@@ -73,18 +75,33 @@ for (const a of ARCHETYPES) {
   const kit = buildArchetype(a)
   const rows = kit.forms.map((f) => `${f.name} ${f.tris}`)
   console.log(`  ${a.padEnd(16)} ${String(used.get(a) ?? 0).padStart(2)} inst | ${rows.join(', ')}`)
-  for (const f of kit.forms) if (f.tris < 30 || f.tris > 300) fail(`${a}/${f.name}: ${f.tris} triangles (want 30-300)`)
+  for (const f of kit.forms) {
+    const [lo, hi] = HERO_FORM_NAMES.has(f.name) ? [400, 3000] : [30, 300]
+    if (f.tris < lo || f.tris > hi) fail(`${a}/${f.name}: ${f.tris} triangles (want ${lo}-${hi})`)
+  }
   total += kit.forms.reduce((s, f) => s + f.tris, 0)
 }
-// worst-case drawn triangles: every landmark visible at once, model + hull
+// worst-case drawn triangles: every landmark visible at once, model + hull (hairlines
+// drawn without an outline are counted once)
 let drawn = 0
 for (const l of LANDMARKS) {
-  const tri = (a: typeof l.arch, form: string) => buildArchetype(a).forms.find((f) => f.name === form)?.tris ?? 0
-  drawn += tri(l.arch, l.form) * 2
-  for (const p of l.parts ?? []) drawn += tri(p.arch, p.form) * 2
+  const tri = (a: typeof l.arch, form: string) => {
+    const f = buildArchetype(a).forms.find((q) => q.name === form)
+    return f ? f.tris + f.hullTris : 0
+  }
+  drawn += tri(l.arch, l.form)
+  for (const p of l.parts ?? []) drawn += tri(p.arch, p.form)
 }
 console.log(`forms: ${ARCHETYPES.reduce((s, a) => s + ARCHETYPE_FORMS[a].length, 0)}; model triangles over all forms: ${total}; worst case drawn (all 72 + hulls): ${drawn}`)
-if (drawn > 60000) fail(`drawn triangles ${drawn} > 60k`)
+// hero models raise the all-at-once worst case; in practice only the few landmarks inside a
+// <1600 km view are drawn at a time (MAX_PX 40 each)
+if (drawn > 120000) fail(`drawn triangles ${drawn} > 120k`)
+for (const h of HEROES) {
+  const l = LANDMARKS.find((x) => x.id === h.id)
+  if (!l) fail(`hero ${h.form}: no landmark ${h.id}`)
+  else if (l.arch !== h.arch || l.form !== h.form) fail(`hero ${h.form}: landmark ${h.id} draws ${l.arch}/${l.form}`)
+}
+console.log(`hero models: ${HEROES.length} (${HEROES.map((h) => h.form).join(', ')})`)
 
 if (errs.length) {
   console.error(`FAIL (${errs.length})`)

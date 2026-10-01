@@ -5,7 +5,9 @@
  *
  * - Light: the terrain's view-space upper-left key (look.lightView) and soft day ramp
  *   (look.day) on the ground normal. Each flat facet (screen-derivative normal) is sorted by
- *   how it faces the key light's ground-plane bearing into THREE PAINTED FACE TONES with wide
+ *   how it faces the key light's bearing in the plane the form stands on (its drawn up: the
+ *   instance's y axis, upright at wide views; the ground normal made the lit side swing
+ *   with the position on the disc) into THREE PAINTED FACE TONES with wide
  *   value steps (finish review round 2): lit walls/roof slopes a warm sunlit ochre (x1.22,
  *   38% toward look.monumentWarm), flat roofs and side-on facets the half tone (x0.66), walls
  *   turned away the cool blued shade (x0.30, 50% toward look.monumentCool), the deepest x0.62
@@ -21,6 +23,11 @@
  *   on real depth steps. (A shallow push let the hulls of thin parts, Milan's pinnacle rows,
  *   win the depth test over the wall behind them and merge into a black wedge.)
  * - Sub-mesh select: vertices whose aVar differs from the instance's iVar collapse.
+ * - Wide-view miniatures (iLift): the whole form slides toward the eye along its view rays
+ *   by iLift model heights, so an exaggerated upright token is never cut by the curved
+ *   ground; 0 at close zoom (plain terrain depth test).
+ * - Theme guard (guardThemeColours, applied by Monuments to every archetype geometry): no
+ *   gilt-like or vermilion faces whichever form they come from.
  * R1: vertex colours are linear (converted from sRGB hex at build), output goes through
  * tonemapping_fragment + colorspace_fragment.
  */
@@ -37,12 +44,14 @@ const vertexShader = /* glsl */ `
   attribute float iVar;
   attribute float iDim;
   attribute vec3 iUp;
+  attribute float iLift;
   uniform vec2 uViewport;
   uniform float uOutlinePx;
   uniform float uHullPush;
   varying vec3 vCol;
   varying vec3 vPosV;
   varying vec3 vUpV;
+  varying vec3 vModelUpV;
   varying float vHull;
   varying float vDim;
   varying float vHPx;
@@ -53,17 +62,26 @@ const vertexShader = /* glsl */ `
     if (abs(aVar - iVar) > 0.5) {
       vPosV = vec3(0.0);
       vUpV = vec3(0.0, 0.0, 1.0);
+      vModelUpV = vec3(0.0, 1.0, 0.0);
       gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
       return;
     }
     mat4 mvi = modelViewMatrix * instanceMatrix;
     vec4 pv = mvi * vec4(position, 1.0);
     vUpV = normalize(mat3(modelViewMatrix) * iUp);
+    // the form's own drawn up (upright on screen at wide views, the leaned ground normal
+    // at close zoom): the facet tones are sorted against the light's bearing in the plane
+    // the model stands on, so the same face is lit wherever on the disc it stands
+    vModelUpV = normalize(mat3(mvi) * vec3(0.0, 1.0, 0.0));
     vec4 clip;
     float hV = length((mvi * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
     // the monument's on-screen height in CSS px (model height 1 = the form's height)
     float hPx = hV * projectionMatrix[1][1] * 0.5 * uViewport.y / max(-pv.z, 1e-6);
     vHPx = hPx;
+    // wide-view miniatures: slide the whole form toward the eye along its view rays (same
+    // screen position, own depth order kept) so the curved ground never cuts into an
+    // exaggerated token standing upright near the bottom of the disc
+    pv.xyz -= normalize(pv.xyz) * iLift * hV;
     if (aHull > 0.5) {
       vec4 c0 = projectionMatrix * pv;
       vec4 c2 = projectionMatrix * (mvi * vec4(position + aOut * 0.03, 1.0));
@@ -97,6 +115,7 @@ const fragmentShader = /* glsl */ `
   varying vec3 vCol;
   varying vec3 vPosV;
   varying vec3 vUpV;
+  varying vec3 vModelUpV;
   varying float vHull;
   varying float vDim;
   varying float vHPx;
@@ -142,9 +161,10 @@ const fragmentShader = /* glsl */ `
       // blued shade; the deepest facets go darker still.
       // facing toward the key light's ground-plane bearing: so every form has a lit side
       // and a shade side however near-vertical the light is in view space
-      vec3 lt = uLightView - up * lu;
+      vec3 mup = normalize(vModelUpV);
+      vec3 lt = uLightView - mup * dot(mup, uLightView);
       lt = dot(lt, lt) > 1e-6 ? normalize(lt) : vec3(-0.7071, 0.7071, 0.0);
-      float side = dot(n - up * dot(n, up), lt);
+      float side = dot(n - mup * dot(n, mup), lt);
       float lit = step(0.16, side);
       float shade = 1.0 - step(-0.16, side);
       float deep = 1.0 - step(-0.62, side);
@@ -217,13 +237,88 @@ export function makeMonumentMaterial(): THREE.ShaderMaterial & { uniforms: Monum
   return m as THREE.ShaderMaterial & { uniforms: MonumentUniforms }
 }
 
-/** Per-instance attributes every archetype mesh carries (sub-mesh select, dim, ground normal). */
+/** Per-instance attributes every archetype mesh carries (sub-mesh select, dim, ground normal, depth lift in model heights). */
 export function attachInstanceAttributes(g: THREE.BufferGeometry, count: number) {
   const iVar = new THREE.InstancedBufferAttribute(new Float32Array(count), 1)
   const iDim = new THREE.InstancedBufferAttribute(new Float32Array(count), 1).setUsage(THREE.DynamicDrawUsage)
   const iUp = new THREE.InstancedBufferAttribute(new Float32Array(count * 3), 3).setUsage(THREE.DynamicDrawUsage)
+  const iLift = new THREE.InstancedBufferAttribute(new Float32Array(count), 1).setUsage(THREE.DynamicDrawUsage)
   g.setAttribute('iVar', iVar)
   g.setAttribute('iDim', iDim)
   g.setAttribute('iUp', iUp)
-  return { iVar, iDim, iUp }
+  g.setAttribute('iLift', iLift)
+  return { iVar, iDim, iUp, iLift }
+}
+
+// ---------------------------------------------------------------- theme colour guard
+
+function linToOklab(r: number, g: number, b: number): [number, number, number] {
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b)
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
+  return [
+    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+  ]
+}
+
+function oklabToLin(L: number, a: number, b: number): [number, number, number] {
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3
+  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3
+  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3
+  return [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+  ]
+}
+
+/**
+ * The theme's colour rules applied to any monument paint, whoever authored the form
+ * (DESIGN.md: The Brass Is Cut Rule, The One Active Place Rule): a gilt-like face
+ * (OKLCh hue 74-94, chroma >= 0.075 — the brass family) is set back to an aged,
+ * low-chroma brass-stone (C 0.045, L <= 0.58) so gilt stays a cut line; a vermilion-like
+ * face (hue 20-46, C >= 0.13) is held at C 0.11. Returns a guarded copy of the linear
+ * vertex-colour attribute (the source geometry is shared and left untouched) and the
+ * number of vertices changed.
+ */
+export function guardThemeColours(src: THREE.BufferAttribute): { attr: THREE.BufferAttribute; changed: number } {
+  const a = src.array as Float32Array
+  const out = new Float32Array(a.length)
+  let changed = 0
+  const cache = new Map<string, [number, number, number] | null>()
+  for (let i = 0; i < a.length; i += 3) {
+    const key = `${a[i]},${a[i + 1]},${a[i + 2]}`
+    let hit = cache.get(key)
+    if (hit === undefined) {
+      hit = null
+      const [L, ca, cb] = linToOklab(a[i], a[i + 1], a[i + 2])
+      const C = Math.hypot(ca, cb)
+      const h = ((Math.atan2(cb, ca) * 180) / Math.PI + 360) % 360
+      let C2 = C
+      let L2 = L
+      if (h >= 74 && h <= 94 && C >= 0.075) {
+        C2 = 0.045
+        L2 = Math.min(L, 0.58)
+      } else if (h >= 20 && h <= 46 && C >= 0.13) C2 = 0.11
+      if (C2 !== C || L2 !== L) {
+        const k = C > 1e-6 ? C2 / C : 0
+        const rgb = oklabToLin(L2, ca * k, cb * k)
+        hit = [Math.max(0, rgb[0]), Math.max(0, rgb[1]), Math.max(0, rgb[2])]
+      }
+      cache.set(key, hit)
+    }
+    if (hit) {
+      out[i] = hit[0]
+      out[i + 1] = hit[1]
+      out[i + 2] = hit[2]
+      changed++
+    } else {
+      out[i] = a[i]
+      out[i + 1] = a[i + 1]
+      out[i + 2] = a[i + 2]
+    }
+  }
+  return { attr: new THREE.BufferAttribute(out, 3), changed }
 }

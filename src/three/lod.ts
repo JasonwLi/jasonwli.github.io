@@ -41,8 +41,9 @@ export function computeLod(
   out.waveFade = smoothstep(3000, 1500, viewKm)
   // vector ribbons fade in exactly as the raster rivers fade out (look.riverOutKm 4500 → 3500)
   out.ribbonFade = smoothstep(4500, 3500, viewKm)
-  // 3D monuments: a quick on/off at the 1600 km gate (Monuments: on < 1600, off > 1620)
-  out.monument3dFade = cube ? smoothstep(1620, 1600, viewKm) : 0
+  // 3D monuments: on at every view on the cube tiers (wide-view miniatures for the curated
+  // set; the rest join from ~1600 km as they become legible, per landmark in Monuments)
+  out.monument3dFade = cube ? 1 : 0
   // glyphs: in 6000 → 5200; out 1100 → 950 (per landmark they hand off earlier, as soon as
   // that landmark's 3D monument is legible: LandmarkGlyphs + monumentShown; LOW: no lower limit)
   out.glyphFade = smoothstep(6000, 5200, viewKm) * (cube ? smoothstep(950, 1100, viewKm) : 1)
@@ -61,7 +62,8 @@ export function zoom01(viewKm: number, maxViewKm: number, minViewKm: number): nu
 
 /**
  * Theme zoom gates in viewKm (critique 12). Monuments, place labels and trees match
- * the fades above (monument3dFade starts at 1600, PlaceLabels below 2500,
+ * the fades above (monumentsKm: where the non-curated monuments start to qualify by
+ * size; the curated miniatures show at every view), PlaceLabels below 2500,
  * treeFade starts at 1400); the view controls show once zoom01 > 0.05.
  */
 export const VIEW_GATES = {

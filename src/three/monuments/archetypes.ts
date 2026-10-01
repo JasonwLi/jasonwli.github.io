@@ -3,9 +3,10 @@
  *
  * One BufferGeometry per archetype (one InstancedMesh each); every landmark form is a
  * sub-mesh tagged aVar = its index in the archetype, and the instance attribute iVar
- * picks it (other sub-meshes collapse in the vertex shader). Each form is 30-300
- * model triangles (checked by dev/check-landmarks.ts and the specimen page), plus the
- * same count again as inverted-hull outline triangles.
+ * picks it (other sub-meshes collapse in the vertex shader). Each low-poly form is
+ * 30-300 model triangles, each hero model (hero/*) 400-3,000 (checked by
+ * dev/check-landmarks.ts and the specimen pages), plus the inverted-hull outline
+ * triangles (the same again, less the hairline members a hero model draws without one).
  *
  * Model space: y up, ground at 0; x right; z toward the viewer (the monument's front
  * always faces the camera, see Monuments.tsx). Silhouettes first: at 14-40 px only
@@ -15,6 +16,7 @@ import * as THREE from 'three'
 import type { Archetype } from '../../data/landmarks'
 import { Kit, type V3 } from './kit.ts'
 import { M } from './palette.ts'
+import { heroForms } from './hero/index.ts'
 
 type Build = (k: Kit) => void
 
@@ -1029,7 +1031,7 @@ const rock: [string, Build][] = [
   }],
 ]
 
-export const ARCHETYPE_FORMS: Record<Archetype, [string, Build][]> = {
+const LOW_POLY_FORMS: Record<Archetype, [string, Build][]> = {
   pyramid,
   obelisk,
   'temple-columns': templeColumns,
@@ -1047,11 +1049,20 @@ export const ARCHETYPE_FORMS: Record<Archetype, [string, Build][]> = {
   rock,
 }
 
+/**
+ * Every archetype's forms: the low-poly set above, then the hero models (hero/*, the 18
+ * most famous landmarks at 400-3,000 triangles) registered as extra sub-meshes of the
+ * same archetype geometry, e.g. dome: [..., 'taj', ..., 'taj-hero', ...].
+ */
+export const ARCHETYPE_FORMS = Object.fromEntries(
+  (Object.keys(LOW_POLY_FORMS) as Archetype[]).map((a) => [a, [...LOW_POLY_FORMS[a], ...heroForms(a)]]),
+) as Record<Archetype, [string, Build][]>
+
 export interface ArchetypeKit {
   geometry: THREE.BufferGeometry
   /** form name -> variant index */
   index: Map<string, number>
-  forms: { name: string; tris: number; box: number[]; size: number }[]
+  forms: { name: string; tris: number; hullTris: number; box: number[]; size: number }[]
 }
 
 /**
@@ -1074,7 +1085,7 @@ export function buildArchetype(arch: Archetype): ArchetypeKit {
     fn(k)
   }
   const geometry = k.build()
-  const forms = k.forms.map((f) => ({ name: f.name, tris: f.tris, box: [...f.box], size: formSize(f.box) }))
+  const forms = k.forms.map((f) => ({ name: f.name, tris: f.tris, hullTris: f.hullTris, box: [...f.box], size: formSize(f.box) }))
   const kit = { geometry, index, forms }
   cache.set(arch, kit)
   return kit
