@@ -5,14 +5,16 @@
  * Placement: inside the travel column, on its bottom line (where the gesture hint
  * sits; the hint steps aside while the controls show). The column is the one
  * place the globe's disc never reaches, so the buttons never float over the
- * paint. Desktop travel only (phones pinch).
+ * paint (at <= 860 px the column starts under the globe band, so the same
+ * bottom line holds them). Every width: they are the keyboard path to zoom.
  *
  * Visibility (written by the overlay's frame loop, never React state):
  *   data-on     travelIn > 0.55: rendered and focusable (else visibility hidden,
  *               so they leave the tab order)
- *   data-shown  zoom01 > 0.05: visible; at the choreographed framing they stay
- *               quiet (transparent) until one takes keyboard focus, so a
- *               keyboard user can still start zooming
+ *   data-shown  fine pointer and zoom01 > 0.05: visible; at the choreographed
+ *               framing, and always on touch devices (which pinch), they stay
+ *               quiet (transparent, no pointer) until one takes keyboard focus,
+ *               so a keyboard or switch user can still zoom
  */
 import { useEffect, useState, type RefObject } from 'react'
 import { createPortal } from 'react-dom'

@@ -108,6 +108,27 @@ export function groundM(d: THREE.Vector3, footRad = 0): number {
   return h
 }
 
+/**
+ * Highest drawn ground (m) on two rings (reachRad and half of it, radius units = radians)
+ * around a direction, at the mesh's current mip: the relief that can stand in front of a
+ * monument's body along the view rays (Monuments' close-zoom depth lift).
+ */
+export function groundMaxM(d: THREE.Vector3, reachRad: number): number {
+  const [lat, lon] = latLonOf(d)
+  const mip = meshMip()
+  let h = surfaceHeightM(lat, lon, mip)
+  const cl = Math.max(0.2, Math.cos(lat * DEG))
+  for (const f of [0.5, 1]) {
+    const dl = (reachRad * f) / DEG
+    const dlo = dl / cl
+    for (let i = 0; i < 8; i++) {
+      const a = ((i + f) / 8) * Math.PI * 2
+      h = Math.max(h, surfaceHeightM(lat + Math.sin(a) * dl, lon + Math.cos(a) * dlo, mip))
+    }
+  }
+  return h
+}
+
 /** Per-frame camera context in the globe-local (inner group) frame. */
 export class CameraContext {
   camLocal = new THREE.Vector3()

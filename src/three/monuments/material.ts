@@ -25,7 +25,9 @@
  * - Sub-mesh select: vertices whose aVar differs from the instance's iVar collapse.
  * - Wide-view miniatures (iLift): the whole form slides toward the eye along its view rays
  *   by iLift model heights, so an exaggerated upright token is never cut by the curved
- *   ground; 0 at close zoom (plain terrain depth test).
+ *   ground; at close zoom on displaced terrain, the relief rising above the form's base
+ *   within its reach (Monuments RELIEF_*), so a monument in a valley is not buried by
+ *   the exaggerated peaks around it; 0 on flat ground (plain terrain depth test).
  * - Theme guard (guardThemeColours, applied by Monuments to every archetype geometry): no
  *   gilt-like or vermilion faces whichever form they come from.
  * R1: vertex colours are linear (converted from sRGB hex at build), output goes through

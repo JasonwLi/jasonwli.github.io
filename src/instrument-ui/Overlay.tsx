@@ -288,6 +288,7 @@ export default function Overlay() {
     let wNeatKey = ''
     let wWordsA = '1'
     let wCtrl = ''
+    const coarseQ = window.matchMedia('(pointer: coarse)')
     let recutDeg = NaN
     let recutR = NaN
     let aliShapeGeom: LimbGeometry | null = null
@@ -869,11 +870,14 @@ export default function Overlay() {
         }
       }
 
-      // -- VIEW CONTROLS (desktop travel) --
+      // -- VIEW CONTROLS (travel, every width: the keyboard path to zoom) --
+      // touch devices pinch, so there they stay transparent until one takes keyboard
+      // focus (still focusable and announced); fine pointers (desktop, narrow windows
+      // included) show them once zoomed, and on focus
       const vc = controlsRef.current
       if (vc) {
-        const on = g.travelIn > 0.55 && !mobile
-        const shown = on && g.lod.zoom01 > 0.05
+        const on = g.travelIn > 0.55
+        const shown = on && !(g.isPhone || coarseQ.matches) && g.lod.zoom01 > 0.05
         const ck = `${on ? 1 : 0}${shown ? 1 : 0}`
         if (ck !== wCtrl) {
           wCtrl = ck

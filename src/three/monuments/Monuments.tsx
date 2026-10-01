@@ -65,7 +65,7 @@ import { monumentBoxes, neatGuard } from '../instrument/screenObstacles'
 import { buildArchetype } from './archetypes'
 import { attachInstanceAttributes, guardThemeColours, makeMonumentMaterial } from './material'
 import { locations } from '../../data/travel'
-import { CameraContext, dirOf, groundM, isCoarsePointer, isLandDir, landmarkInfos, monumentShown, type LandmarkInfo } from './landmarkFrame'
+import { CameraContext, dirOf, groundM, groundMaxM, isCoarsePointer, isLandDir, landmarkInfos, monumentShown, type LandmarkInfo } from './landmarkFrame'
 import { HERO_FORM_NAMES } from './hero/index'
 import { heightGridReady } from '../geo/heightGrid'
 
@@ -144,6 +144,18 @@ const SIN_E = Math.sin(VIEW_ELEV)
 const UPRIGHT_KM: [number, number] = [1800, 3600]
 /** depth lift toward the eye (model heights) at wide views, see material.ts iLift */
 const LIFT_H = 1.2
+/**
+ * Close zoom on displaced terrain (x12 relief): a monument in a valley (Machu Picchu on
+ * its saddle above the Urubamba, ringed by 4-6 km peaks within 20 km) has relief up to
+ * ~1.5 of its own drawn heights standing around it, which buried its body and left only
+ * Huayna Picchu's summit. The form keeps its true ground base (no floating) and slides
+ * toward the eye along its view rays by the relief that rises above that base within
+ * its reach (half its footprint diagonal + half its height: the near-nadir view rays to
+ * its top cross that ground), plus a margin; capped so a monument behind a real ridge on
+ * a tilted view stays hidden.
+ */
+const RELIEF_MARGIN_H = 0.2
+const RELIEF_LIFT_MAX_H = 3
 const NATURAL = new Set<Archetype>(['mountain-peak', 'waterfall', 'canyon', 'rock'])
 const SCALE_IN_MS = 250
 const SCREEN_MARGIN_PX = 80
@@ -159,6 +171,7 @@ interface Slot {
   size: number // model size measure (formSize)
   mainSize: number // the landmark's main form size (parts scale with it)
   width: number // model bbox width
+  depth: number // model bbox depth
   height: number
   part: { x: number; z: number; s: number } | null
   yaw: number
@@ -294,7 +307,7 @@ export function Monuments({ tier }: { tier: Tier }) {
       // upper-left key light); others a small fixed per-landmark turn the same way
       const yaw = info.lm.face ?? -(0.3 + ((info.index * 7) % 5) * 0.04)
       const mainSize = part ? (slots.find((q) => q.info === info && !q.part)?.size ?? f.size) : f.size
-      slots.push({ info, arch, mesh: mi, slot, variant, size: f.size, mainSize, width: f.box[3] - f.box[0], height: f.box[4], part, yaw })
+      slots.push({ info, arch, mesh: mi, slot, variant, size: f.size, mainSize, width: f.box[3] - f.box[0], depth: f.box[5] - f.box[2], height: f.box[4], part, yaw })
     }
     for (const info of infos) {
       add(info, info.lm.arch, info.lm.form, null)
@@ -770,7 +783,7 @@ export function Monuments({ tier }: { tier: Tier }) {
     const { base, U2, F2, Xr, Zr, p, m } = tmp
     const wideView = smooth(lod.viewKm, UPRIGHT_KM[0], UPRIGHT_KM[1])
     const upright = UPRIGHT * wideView
-    const lift = LIFT_H * wideView
+    const wideLift = LIFT_H * wideView
     for (const s of slots) {
       const i = s.info.index
       const f = fr[i]
@@ -810,6 +823,14 @@ export function Monuments({ tier }: { tier: Tier }) {
       if (s.part) p.addScaledVector(Xr, s.part.x * kMain).addScaledVector(Zr, s.part.z * kMain)
       const dimShrink = 1 - 0.12 * anim[i].dim
       const kk = k * vis * dimShrink
+      // depth lift (model units, see material.ts iLift): the wide-view token's, or the
+      // displaced relief standing over the base within the form's reach
+      let lift = wideLift
+      if (lod.heightScale > 0 && kk > 1e-9) {
+        const reach = (0.5 * Math.hypot(s.width, s.depth) + 0.5 * s.height) * k
+        const above = 1 + groundMaxM(U, reach) * lod.heightScale - r
+        if (above > 0) lift = Math.max(lift, Math.min(RELIEF_LIFT_MAX_H * s.height, above / kk + RELIEF_MARGIN_H * s.height))
+      }
       m.set(
         Xr.x * kk, U2.x * kk, Zr.x * kk, p.x,
         Xr.y * kk, U2.y * kk, Zr.y * kk, p.y,

@@ -185,8 +185,10 @@
 }
 
 @media (max-width: 860px) {
+  /* the column's bottom line under the globe band: icons on the 16 px text edge */
   .view-controls {
-    display: none;
+    left: 2px;
+    bottom: 2px;
   }
   /* the 13 px floor for Castoro text on phones */
   .ins-meridian,

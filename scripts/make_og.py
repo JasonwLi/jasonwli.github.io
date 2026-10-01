@@ -1,59 +1,100 @@
-"""Compose og.png (1200x630) deterministically with the site's own fonts."""
+#!/usr/bin/env python3
+"""Regenerate public/og.png (1200x630), the link preview card, from the live site.
+
+    ~/dev/dw3-lock scripts/terrain/.venv/bin/python scripts/make_og.py [--port 5321]
+
+Heavy (dev server + headless WebGL): always run it through the machine lock.
+Steps:
+  1. scripts/serve.sh start PORT (a Vite dev server of this checkout)
+  2. node scripts/make-og.mjs: captures the hero's painted globe in its gilt degree limb
+     (pins and overlay included) at 2x, and lays the card over the live page so the
+     site's own tokens, art strokes and self-hosted Castoro faces render the throne
+     (crest, "JASON LI", double rule, silver tagline) and the live counts line
+     (places / countries / photographs / years, read from the travel column)
+  3. scripts/serve.sh stop PORT
+  4. writes public/og.png under BUDGET: lossless when it fits, else every channel rounded
+     to a step of 2 or 3 (max error 1 level, invisible; the painted relief compresses
+     ~20% better), never palette quantization (it flattens the relief)
+  5. stamps provenance (impeccable embed-prompt.mjs) when that script is installed
+Only PIL is needed (scripts/terrain/.venv has it).
+"""
+import argparse
 import io
-import json
 import os
+import subprocess
+import sys
 
-from fontTools.ttLib.woff2 import decompress
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 
-# night-hero.png: a 1440px-wide screenshot of the hero (globe on the right, text-free there)
-BASE = os.environ.get("PIPELINE_BASE", os.path.expanduser("~/dev/personal-website/.pipeline"))
-NM = "/Users/jasonli/dev/personal-website/node_modules"
-OUT = "/Users/jasonli/dev/personal-website/public/og.png"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT = os.path.join(ROOT, "public", "og.png")
+RAW = os.path.join(ROOT, "scripts", ".cache", "og", "og-raw.png")
+GLOBE = os.path.join(ROOT, "scripts", ".cache", "og", "globe@2x.png")
+BUDGET = 400 * 1024
+EMBED = [
+    p
+    for p in (
+        os.environ.get("EMBED_PROMPT_MJS", ""),
+        os.path.expanduser("~/.claude/skills/impeccable/scripts/embed-prompt.mjs"),
+    )
+    if p
+]
+PROMPT = (
+    "Link preview card for jasonli.world in the Astrolabe design system: heat-blued steel "
+    "ground #011844; the gilt astrolabe-throne crest, 'JASON LI' in Castoro Titling gilt on its "
+    "engraved double rule and the silver hero tagline at left, with the live counts line in "
+    "silver-2; at right a real 2x render of the site's painted terrain globe inside its engraved "
+    "gilt degree limb, pins and monuments included. Composited by scripts/make-og.mjs from the "
+    "live page (no redraw)."
+)
 
-def load_woff2(path, size, variations=None):
-    buf = io.BytesIO()
-    with open(path, "rb") as f:
-        decompress(f, buf)
-    buf.seek(0)
-    font = ImageFont.truetype(buf, size)
-    if variations:
-        font.set_variation_by_axes(variations)
-    return font
 
-bricolage = f"{NM}/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2"
-garamond = f"{NM}/@fontsource/eb-garamond/files/eb-garamond-latin-400-italic.woff2"
-mono = f"{NM}/@fontsource/fragment-mono/files/fragment-mono-latin-400-normal.woff2"
+def encode(im: Image.Image) -> bytes:
+    for step in (1, 2, 3):
+        q = im if step == 1 else im.point([min(255, round(v / step) * step) for v in range(256)] * 3)
+        buf = io.BytesIO()
+        q.save(buf, "PNG", optimize=True)
+        if len(buf.getvalue()) <= BUDGET or step == 3:
+            print(f"make_og: channel step {step}: {len(buf.getvalue()) / 1024:.0f} KB")
+            return buf.getvalue()
+    raise AssertionError("unreachable")
 
-name_f = load_woff2(bricolage, 96, [780])
-sub_f = load_woff2(bricolage, 30, [420])
-map_f = load_woff2(garamond, 30)
-mono_f = load_woff2(mono, 17)
 
-# stats from live data
-d = json.load(open("/Users/jasonli/dev/personal-website/public/travel-data.json"))
-places = len(d["locations"])
-countries = len({l["cc"] for l in d["locations"]})
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--port", default="5321")
+    a = ap.parse_args()
+    url = f"http://localhost:{a.port}"
+    serve = os.path.join(ROOT, "scripts", "serve.sh")
+    if subprocess.run([serve, "start", a.port], cwd=ROOT).returncode != 0:
+        return 1
+    try:
+        r = subprocess.run(
+            ["node", os.path.join(ROOT, "scripts", "make-og.mjs"), "--url", url, "--out", RAW, "--globe-out", GLOBE],
+            cwd=ROOT,
+        )
+    finally:
+        subprocess.run([serve, "stop", a.port], cwd=ROOT)
+    if r.returncode != 0:
+        return r.returncode
 
-img = Image.new("RGB", (1200, 630), (16, 20, 31))
+    im = Image.open(RAW).convert("RGB")
+    if im.size != (1200, 630):
+        print(f"make_og: unexpected size {im.size}", file=sys.stderr)
+        return 1
+    data = encode(im)
+    with open(OUT, "wb") as f:
+        f.write(data)
+    print(f"make_og: wrote {OUT} ({len(data) / 1024:.0f} KB)")
 
-# globe from an existing clean render (right side of the hero screenshot, text-free)
-src = Image.open(f"{BASE}/night-hero.png").convert("RGB")
-crop = src.crop((760, 60, 1440, 740))  # globe region only
-crop = crop.resize((640, 640), Image.LANCZOS)
-img.paste(crop, (620, -5))
+    for script in EMBED:
+        if os.path.exists(script):
+            subprocess.run(["node", script, OUT, "--prompt", PROMPT], cwd=ROOT, check=False)
+            break
+    else:
+        print("make_og: embed-prompt.mjs not installed; provenance not stamped")
+    return 0
 
-draw = ImageDraw.Draw(img)
-ink = (240, 238, 230)
-muted = (168, 176, 191)
-brass = (217, 189, 133)
 
-x = 70
-draw.text((x, 175), "Jason Li", font=name_f, fill=ink)
-draw.text((x, 305), "Software engineer — payments, FX", font=sub_f, fill=ink)
-draw.text((x, 345), "& stablecoin infrastructure.", font=sub_f, fill=ink)
-draw.text((x, 420), f"{places} places under a different sky", font=map_f, fill=brass)
-draw.text((x, 470), f"{countries} countries · engineer, traveler", font=mono_f, fill=muted)
-
-img.save(OUT, "PNG", optimize=True)
-print(f"og.png written: {places} places, {countries} countries")
+if __name__ == "__main__":
+    sys.exit(main())

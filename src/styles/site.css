@@ -44,6 +44,10 @@
 .nav-link.is-current {
   color: var(--silver);
 }
+.nav-rule,
+.nav-fiducial {
+  pointer-events: none; /* the ticks sit under the words: taps go to the links */
+}
 .nav-fiducial {
   position: absolute;
   left: -3.5px;
@@ -621,15 +625,17 @@ span.heading-rule {
   width: calc(100% + 32px);
   height: 22px;
   margin: 0 -16px;
+  flex: none; /* the sheet is a flex column: never let the strip shrink to its 1 px rule */
   background: var(--steel-field);
   touch-action: none;
   cursor: grab;
 }
 .sheet-handle::after {
-  /* a 44 px target over a 22 px strip */
+  /* a 44 px target over a 22 px strip, stopping short of the close button
+     (its 44 px box sits 4..48 px in from the sheet's right edge) */
   content: '';
   position: absolute;
-  inset: 0 0 -22px;
+  inset: 0 52px -22px 0;
 }
 .sheet-handle-rule {
   display: block;
@@ -792,7 +798,12 @@ span.heading-rule {
   max-width: none;
 }
 .credits {
-  margin-top: 4px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.credits li {
+  display: inline;
 }
 .credits .link:hover {
   color: var(--silver);
@@ -962,6 +973,10 @@ span.heading-rule {
   }
   .travel-hint {
     margin-top: 10px;
+    /* the strip the view controls swap into (44 px buttons 2 px off the column's
+       bottom): reserve it so they never sit over the last place row */
+    min-height: 34px;
+    padding-block: 8px;
   }
   .loc-row {
     height: 44px;
@@ -1015,6 +1030,28 @@ span.heading-rule {
   }
   .footer-fine {
     margin-top: 48px;
+  }
+  /* touch: one source per row (44 px pitch: a 19.5 px line + 2 x 12.25 px). Each link's
+     inline padding grows its 13 px content box to a 44 px hit box (2 x 15.5 px) that
+     exactly fills its row, so no two targets overlap. Type, colour and underline are
+     unchanged. */
+  .credits {
+    margin-top: 0;
+  }
+  .credits li {
+    display: block;
+    padding-block: 12.25px;
+    line-height: 19.5px;
+  }
+  .credits .credits-dot,
+  .credits .credits-dot + .sr-only {
+    display: none;
+  }
+  .credits .link {
+    padding-block: 15.5px;
+  }
+  .credits .credits-licence {
+    padding-inline: 2px; /* 'licence' sets 41 px wide */
   }
 }
 
