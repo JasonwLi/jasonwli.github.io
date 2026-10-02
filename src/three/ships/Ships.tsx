@@ -50,7 +50,7 @@ import { registerDebug } from '../debugHooks'
 import { locations } from '../../data/travel'
 import { EARTH_KM } from '../geo/radii'
 import { heightGridReady } from '../geo/heightGrid'
-import { drawnRoute, monumentBoxes, neatGuard, routeFadeAt, townBoxes } from '../instrument/screenObstacles'
+import { drawnRoute, monumentBoxes, neatGuard, routeFadeAt, shipMarks, townBoxes } from '../instrument/screenObstacles'
 import { CameraContext, groundM, isCoarsePointer, isLandDir } from '../monuments/landmarkFrame'
 import { guardThemeColours } from '../monuments/material'
 import { buildCaravel } from './caravel'
@@ -309,6 +309,7 @@ export function Ships({ tier, reducedMotion }: { tier: Tier; reducedMotion: bool
     const g = globeState
     const inner = sceneRefs.inner
     const { mesh, attrs, legs, legByFrom, anchor, ctx, stats, material, ship } = parts
+    shipMarks.length = 0
     const dt = Math.min(rawDt, 0.1)
     const surface = g.surfaceReady && (g.stage === 'B' || g.stage === 'C' || g.stage === 'D')
     const gridReady = heightGridReady()
@@ -596,6 +597,7 @@ export function Ships({ tier, reducedMotion }: { tier: Tier; reducedMotion: bool
         H.z * kk, U2.z * kk, Z.z * kk, base.z,
         0, 0, 0, 1,
       )
+      if (ctx.project(base, scr)) shipMarks.push(scr[0], scr[1], px * 0.75)
       const j = count++
       mesh.setMatrixAt(j, m)
       attrs.iVar.setX(j, 0)

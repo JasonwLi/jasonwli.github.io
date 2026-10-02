@@ -29,6 +29,7 @@ const LandmarkGlyphs = lazy(() => import('./monuments/LandmarkGlyphs'))
 const Ships = lazy(() => import('./ships/Ships'))
 const Towns = lazy(() => import('./towns/Towns'))
 const Life = lazy(() => import('./life/Life'))
+const Portolan = lazy(() => import('./portolan/Portolan'))
 const MapLabels = lazy(() => import('./labels/MapLabels'))
 const PlaceLabels = lazy(() => import('./labels/PlaceLabels'))
 
@@ -96,6 +97,10 @@ export function GlobeScene({ reducedMotion, onContextFailed }: { reducedMotion: 
           {/* smoke, mist and cloud wisps: read the glyphs', monuments', towns' and names' boxes of the same frame */}
           <Suspense fallback={null}>
             <Life tier={tier} reducedMotion={reducedMotion} />
+          </Suspense>
+          {/* portolan wind roses and rhumbs on the open sea: read the names', pins', ships' and route's screen boxes of the same frame */}
+          <Suspense fallback={null}>
+            <Portolan tier={tier} />
           </Suspense>
           <Instrument reducedMotion={reducedMotion} />
         </CameraRig>

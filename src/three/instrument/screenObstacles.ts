@@ -110,6 +110,20 @@ export const townBoxes: number[] = []
 export const townLabelReach: number[] = []
 
 /**
+ * The ships drawn this frame (ships/Ships.tsx): packed [cx, cy, r] CSS px per ship (the hull's
+ * waterline point and a radius covering hull and sails). The portolan rhumb lines yield
+ * under them (portolan/Portolan.tsx).
+ */
+export const shipMarks: number[] = []
+
+/**
+ * The portolan wind roses drawn this frame (portolan/Portolan.tsx): packed [cx, cy, r] CSS px
+ * per rose on the near side (r covers the ring and the north mark). The cloud wisps keep off
+ * them (life/Life.tsx).
+ */
+export const roseMarks: number[] = []
+
+/**
  * The region / sea names MapLabels placed in its last declutter pass: packed [x0, y0, x1, y1]
  * CSS px (padded rects). Empty while the names are hidden. The painted cloud wisps keep off
  * them (life/Life.tsx); the place names' rects are labels/declutter placeRects.

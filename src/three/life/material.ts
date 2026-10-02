@@ -3,7 +3,8 @@
  * painted wash, all procedural (no texture):
  *  0 SMOKE  a soft round puff, billboarded at its anchor (px offset + px size);
  *  1 MIST   a wide low spray puff, billboarded;
- *  2 BOW    a faint three-band arc (muted rose / sage / pale blue: never gilt, never vermilion);
+ *  2 BOW    a faint three-band partial arc (muted rose / sage / pale blue: never gilt, never
+ *           vermilion), a short segment off the spray's side, never round the glyph;
  *  3 CLOUD  a flat elongated wisp lying on a shell above the terrain (tangent quad, world size).
  * Painted, not photoreal: a static per-instance value-noise edge (the forms never boil; motion
  * is only the CPU-placed drift / rise), a two-tone fill lit from the upper left (One Light:
@@ -130,15 +131,17 @@ const fragmentShader = /* glsl */ `
     float seed = vMeta.z;
     vec2 uv = vUv;
     if (kind > 1.5 && kind < 2.5) {
-      // the faint bow: three muted bands on an arc filling the quad (ends at its lower
-      // corners, crown at its top edge)
-      float r = length(vec2(uv.x, (uv.y + 1.0) * 0.5));
-      float t = (r - 0.84) / 0.16;
+      // the faint partial bow: three muted bands on a short arc of the circle centred at the
+      // quad's lower-left corner (radius = the quad's side), 10 -> 58 deg above horizontal
+      vec2 q = (uv + 1.0) * 0.5;
+      float r = length(q);
+      float t = (r - 0.85) / 0.15;
       if (t < 0.0 || t > 1.0) discard;
-      float band = smoothstep(0.0, 0.25, t) * (1.0 - smoothstep(0.75, 1.0, t));
+      float ang = atan(q.y, q.x);
+      float band = smoothstep(0.0, 0.3, t) * (1.0 - smoothstep(0.7, 1.0, t));
       vec3 col = mix(uBow2, uBow1, smoothstep(0.28, 0.4, t));
       col = mix(col, uBow0, smoothstep(0.6, 0.72, t));
-      float ends = smoothstep(-0.9, -0.2, uv.y);
+      float ends = smoothstep(0.17, 0.4, ang) * (1.0 - smoothstep(0.7, 1.01, ang));
       float a = band * ends * alpha;
       if (a < 0.004) discard;
       gl_FragColor = vec4(col, a);

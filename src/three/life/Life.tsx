@@ -14,14 +14,17 @@
  *    column or the phone sheet; inside the deep-zoom neatline).
  *  - WATERFALL MIST at Iguazu, Victoria and Niagara: a steady spray puff at the foot of the
  *    falls with three slower puffs breathing up out of it (10 s), and a faint three-band bow
- *    (muted rose / sage / pale blue) behind; 30 -> 46 px wide from 1500 to 600 km; fades in
+ *    (muted rose / sage / pale blue) as a short partial arc rising off the spray's right end
+ *    (10-58 deg of a circle centred right of the spray: never over or around the glyph,
+ *    ~2 px thin, 26% alpha); 30 -> 46 px wide from 1500 to 600 km; fades in
  *    1800 -> 1500 km.
  *  - CLOUD WISPS: flat painted wisps (EU4 map clouds) lying on a shell above the relief,
  *    seeded on a Fibonacci lattice (|lat| < 64) and drifting very slowly (east in the
  *    westerlies, west in the trade-wind belt; ~0.5 px/s at 4000 km). Only in the mid band:
  *    in 6200 -> 5000 km, out 2000 -> 1500 km (the hero globe and close zoom stay clean). A
  *    wisp shows only while its whole painted extent keeps off the pins (the active place by a
- *    wide margin), the place and region names, the monuments, glyphs and towns, the readout,
+ *    wide margin), the place and region names, the monuments, glyphs and towns, the portolan
+ *    wind roses (portolan/Portolan.tsx), the readout,
  *    and stays inside the globe's free area (never over the travel column; inside the
  *    deep-zoom neatline); greedy, incumbents first, at most 4 (phones 2); each fades in / out
  *    over 1.6 s as it drifts clear of / onto something. Horizon-faded (facing 0.25 -> 0.45).
@@ -48,7 +51,7 @@ import { registerDebug } from '../debugHooks'
 import { LIFT, EARTH_KM } from '../geo/radii'
 import { LANDMARKS } from '../../data/landmarks'
 import { instrumentLayout } from '../instrument/anchors'
-import { GLYPH_BOX_PX, glyphBoxes, mapLabelRects, monumentFootprints, neatGuard, readoutBox, townBoxes } from '../instrument/screenObstacles'
+import { GLYPH_BOX_PX, glyphBoxes, mapLabelRects, monumentFootprints, neatGuard, readoutBox, roseMarks, townBoxes } from '../instrument/screenObstacles'
 import { placeRects } from '../labels/declutter'
 import {
   CameraContext, dirOf, glyphShiftPx, glyphShown, groundMaxM, isCoarsePointer, landmarkInfos, monumentBase, monumentShown, monumentTop,
@@ -78,7 +81,10 @@ const MIST_PERIOD_S = 10
 const MIST_KM = [1500, 600]
 const MIST_W_PX = [30, 46]
 const MIST_SHOW: [number, number] = [1500, 1800]
-const BOW_ALPHA = 0.3
+const BOW_ALPHA = 0.26
+/** the bow: its circle's centre right of the spray centre and its radius, x W */
+const BOW_C = 0.25
+const BOW_R = 0.42
 
 // clouds
 const CLOUD_SEEDS = 120
@@ -392,6 +398,10 @@ export function Life({ tier, reducedMotion }: { tier: Tier; reducedMotion: boole
         for (let j = 0; j + 1 < glyphBoxes.length; j += 2) {
           if (b[2] > glyphBoxes[j] - h - OBST_GAP_PX && b[0] < glyphBoxes[j] + h + OBST_GAP_PX && b[3] > glyphBoxes[j + 1] - h - OBST_GAP_PX && b[1] < glyphBoxes[j + 1] + h + OBST_GAP_PX) return 'glyph'
         }
+        for (let j = 0; j + 2 < roseMarks.length; j += 3) {
+          const r = roseMarks[j + 2] + OBST_GAP_PX
+          if (b[2] > roseMarks[j] - r && b[0] < roseMarks[j] + r && b[3] > roseMarks[j + 1] - r && b[1] < roseMarks[j + 1] + r) return 'rose'
+        }
         if (readoutBox.on && b[2] > readoutBox.x0 && b[0] < readoutBox.x1 && b[3] > readoutBox.y0 && b[1] < readoutBox.y1) return 'readout'
         return ''
       }
@@ -500,8 +510,11 @@ export function Life({ tier, reducedMotion }: { tier: Tier; reducedMotion: boole
         const [ox, oy] = off
         if (!onScreen(A, ox, oy, W)) continue
         p.anchors[s.id] = { x: Math.round(scr[0] + ox), y: Math.round(scr[1] - oy), a: +a.toFixed(2), src: w > 0.5 ? 'monument' : glyphShown[s.index] > 0.5 ? 'glyph' : 'relief', px: +W.toFixed(1) }
-        // the bow stands on the spray: ends at its level, crown 0.62 W above it
-        push(A, 2, a * BOW_ALPHA, s.seed, 0, ox, oy + 0.31 * W, 0.56 * W, 0.31 * W)
+        // a partial bow off the spray's downwind (right) end: a short arc segment whose
+        // circle is centred BOW_C right of the spray, never reaching over the falls' glyph;
+        // the quad's lower-left corner is that centre (material kind 2)
+        const br = BOW_R * W
+        push(A, 2, a * BOW_ALPHA, s.seed, 0, ox + BOW_C * W + 0.5 * br, oy + 0.5 * br, 0.5 * br, 0.5 * br)
         push(A, 1, a * 0.9, s.seed * 3.1, 0, ox, oy + W * 0.02, W * 0.5, W * 0.26)
         for (let j = 0; j < MIST_PUFFS; j++) {
           const u = fract(p.clock / MIST_PERIOD_S + j / MIST_PUFFS + s.seed)
