@@ -47,6 +47,22 @@ let infos: LandmarkInfo[] | null = null
  */
 export const monumentShown = new Float32Array(LANDMARKS.length)
 
+/**
+ * Per landmark (LANDMARKS order, xyz globe-local): the drawn 3D form's base point and the
+ * top of its main part (base + its drawn up axis x height), written by Monuments for every
+ * form drawn this frame (valid while monumentShown > 0). The life layer (life/Life.tsx)
+ * sets a volcano's smoke on the summit and a waterfall's mist on the falls.
+ */
+export const monumentBase = new Float32Array(LANDMARKS.length * 3)
+export const monumentTop = new Float32Array(LANDMARKS.length * 3)
+
+/**
+ * Per landmark: the 2D glyph's drawn alpha (0..1) and its screen x shift (CSS px, the
+ * pin-clearance slide), written by LandmarkGlyphs every frame (life/Life.tsx anchors on it).
+ */
+export const glyphShown = new Float32Array(LANDMARKS.length)
+export const glyphShiftPx = new Float32Array(LANDMARKS.length)
+
 export function landmarkInfos(): LandmarkInfo[] {
   if (infos) return infos
   const pinDirs = locations.map((l) => dirOf(l.lat, l.lon))

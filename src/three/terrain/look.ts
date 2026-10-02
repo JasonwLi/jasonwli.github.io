@@ -26,6 +26,17 @@ export const look = {
   /** monument face tones (finish review): the relief paint's warm light and cool shade hues */
   monumentWarm: '#e2c99a', // oklch(0.84 0.060 82) sunlit ochre
   monumentCool: '#5f7290', // oklch(0.54 0.050 258) blued shade
+  /**
+   * life on the map (life/Life.tsx): volcano smoke, waterfall mist, cloud wisps. Whites are
+   * capped at OKLab L 0.80 so nothing glares on the dark page; shades take the steel's blue.
+   * The bow is three thin muted bands (C <= 0.06, far from gilt's 84 and vermilion's 33 hue at C 0.2): never gilt, never vermilion.
+   */
+  lifeSmokeLit: '#bdb6ae', //   oklch(0.78 0.014 75) pale warm ash
+  lifeSmokeShade: '#6b7681', // oklch(0.56 0.022 252) blued shade
+  lifeMist: '#b7bfc3', //       oklch(0.80 0.010 225) cool spray
+  lifeCloudLit: '#c1bdb7', //   oklch(0.80 0.010 80) warm paper-white
+  lifeCloudShade: '#7b8896', // oklch(0.62 0.026 250) blued shade
+  lifeBow: ['#c6959f', '#9bb395', '#7fa3c2'] as [string, string, string], // rose / sage / pale blue: oklch(0.72 0.06 5), (0.74 0.05 140), (0.70 0.06 245)
 
   /** OKLab L caps after lighting (theme: land <= 0.66 in both modes; ice/snow 0.86) */
   landLumaCap: 0.66,

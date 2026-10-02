@@ -28,6 +28,7 @@ const Monuments = lazy(() => import('./monuments/Monuments'))
 const LandmarkGlyphs = lazy(() => import('./monuments/LandmarkGlyphs'))
 const Ships = lazy(() => import('./ships/Ships'))
 const Towns = lazy(() => import('./towns/Towns'))
+const Life = lazy(() => import('./life/Life'))
 const MapLabels = lazy(() => import('./labels/MapLabels'))
 const PlaceLabels = lazy(() => import('./labels/PlaceLabels'))
 
@@ -91,6 +92,10 @@ export function GlobeScene({ reducedMotion, onContextFailed }: { reducedMotion: 
           {/* its own boundary: the ships' chunk never holds back the labels and monuments */}
           <Suspense fallback={null}>
             <Ships tier={tier} reducedMotion={reducedMotion} />
+          </Suspense>
+          {/* smoke, mist and cloud wisps: read the glyphs', monuments', towns' and names' boxes of the same frame */}
+          <Suspense fallback={null}>
+            <Life tier={tier} reducedMotion={reducedMotion} />
           </Suspense>
           <Instrument reducedMotion={reducedMotion} />
         </CameraRig>

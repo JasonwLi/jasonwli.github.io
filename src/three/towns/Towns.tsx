@@ -20,7 +20,9 @@
  * Declutter (screen space, greedy): the active place first, then photo count, incumbents
  * ahead of newcomers; a town's box may not overlap a placed town (incumbents get 2 px of
  * slack), the drawn monuments (all of them, dimmed ones included) or the 2D landmark
- * glyphs: there the MONUMENT WINS — the town first shrinks to 65%, else waits; inside the
+ * glyphs: there the MONUMENT WINS — the town first shrinks to 65%, else waits (except the
+ * ACTIVE place's town over its own landmarks' dimmed monument / glyph: One Active Place, so
+ * Rome and Cairo show their towns when chosen); inside the
  * deep-zoom neatline; at most 40 (phones 12). Each town scales in / fades over 260 ms;
  * horizon-faded (facing 0.1 -> 0.3); faded with the section dim (gone in work / contact).
  * Active place: its town stays full while the other towns dim slightly (x0.86, iDim 0.28)
@@ -43,7 +45,7 @@ import { registerDebug } from '../debugHooks'
 import { locations } from '../../data/travel'
 import { pinLocal } from '../instrument/pinsPx'
 import { LIFT } from '../geo/radii'
-import { GLYPH_BOX_PX, glyphBoxes, monumentFootprints, neatGuard, townBoxes, townLabelReach } from '../instrument/screenObstacles'
+import { GLYPH_BOX_PX, glyphBoxes, glyphPlaces, monumentFootprints, neatGuard, townBoxes, townLabelReach } from '../instrument/screenObstacles'
 import { CameraContext, dirOf, groundM, groundMaxM, isCoarsePointer } from '../monuments/landmarkFrame'
 import { guardThemeColours } from '../monuments/material'
 import { TOWN_VARIANTS, buildTown, townClassOf, townVariantOf, type TownClass } from './townKit'
@@ -341,13 +343,18 @@ export function Towns({ tier, reducedMotion }: { tier: Tier; reducedMotion: bool
       return out
     }
     const bx = [0, 0, 0, 0]
-    const hitsMonument = (b: number[]) => {
+    // One Active Place: the active place's own town wins over its own landmarks (their
+    // monument is dimmed under the active pin; their glyph is a map symbol) — Rome over the
+    // Colosseum, Cairo over Giza; every other town still yields to every monument / glyph
+    const hitsMonument = (b: number[], own: number) => {
       const mb = monumentFootprints
-      for (let q = 0; q + 3 < mb.length; q += 4) {
+      for (let q = 0; q + 4 < mb.length; q += 5) {
+        if (own >= 0 && mb[q + 4] === own) continue
         if (b[2] > mb[q] - MON_GAP_PX && b[0] < mb[q + 2] + MON_GAP_PX && b[3] > mb[q + 1] - MON_GAP_PX && b[1] < mb[q + 3] + MON_GAP_PX) return true
       }
       const h = GLYPH_BOX_PX / 2 - 4 // the glyph's ink, not its declutter box
       for (let q = 0; q + 1 < glyphBoxes.length; q += 2) {
+        if (own >= 0 && glyphPlaces[q >> 1] === own) continue
         const cx = glyphBoxes[q], cy = glyphBoxes[q + 1]
         if (b[2] > cx - h && b[0] < cx + h && b[3] > cy - h && b[1] < cy + h) return true
       }
@@ -370,7 +377,7 @@ export function Towns({ tier, reducedMotion }: { tier: Tier; reducedMotion: bool
       let k = 0
       for (const kk of [1, SHRINK]) {
         boxOf(t, kk, bx)
-        if (!inNeat(bx) || hitsMonument(bx)) continue
+        if (!inNeat(bx) || hitsMonument(bx, t.place === active ? t.place : -1)) continue
         if (!clearOfTowns(bx, t.kept)) break // a stronger town owns the spot: shrinking is for monuments only
         k = kk
         break

@@ -65,7 +65,7 @@ import { monumentBoxes, monumentFootprints, neatGuard } from '../instrument/scre
 import { buildArchetype } from './archetypes'
 import { attachInstanceAttributes, guardThemeColours, makeMonumentMaterial } from './material'
 import { locations } from '../../data/travel'
-import { CameraContext, dirOf, groundM, groundMaxM, isCoarsePointer, isLandDir, landmarkInfos, monumentShown, type LandmarkInfo } from './landmarkFrame'
+import { CameraContext, dirOf, groundM, groundMaxM, isCoarsePointer, isLandDir, landmarkInfos, monumentBase, monumentShown, monumentTop, type LandmarkInfo } from './landmarkFrame'
 import { HERO_FORM_NAMES } from './hero/index'
 import { heightGridReady } from '../geo/heightGrid'
 
@@ -826,6 +826,16 @@ export function Monuments({ tier }: { tier: Tier }) {
       if (s.part) p.addScaledVector(Xr, s.part.x * kMain).addScaledVector(Zr, s.part.z * kMain)
       const dimShrink = 1 - 0.12 * anim[i].dim
       const kk = k * vis * dimShrink
+      if (!s.part) {
+        // the drawn form's base and summit (life layer: smoke, mist)
+        const o = i * 3
+        monumentBase[o] = p.x
+        monumentBase[o + 1] = p.y
+        monumentBase[o + 2] = p.z
+        monumentTop[o] = p.x + U2.x * s.height * kk
+        monumentTop[o + 1] = p.y + U2.y * s.height * kk
+        monumentTop[o + 2] = p.z + U2.z * s.height * kk
+      }
       // depth lift (model units, see material.ts iLift): the wide-view token's, or the
       // displaced relief standing over the base within the form's reach
       let lift = wideLift
@@ -857,7 +867,7 @@ export function Monuments({ tier }: { tier: Tier }) {
           const hw = s.width * kk * f.ppu * 0.5 + 2
           const x0 = Math.min(scr[0], scr2[0]) - hw, y0 = Math.min(scr[1], scr2[1]) - 2
           const x1 = Math.max(scr[0], scr2[0]) + hw, y1 = Math.max(scr[1], scr2[1]) + 3
-          monumentFootprints.push(x0, y0, x1, y1)
+          monumentFootprints.push(x0, y0, x1, y1, s.info.placeIndex)
           if (anim[i].dim < 0.5) monumentBoxes.push(x0, y0, x1, y1)
         }
       }

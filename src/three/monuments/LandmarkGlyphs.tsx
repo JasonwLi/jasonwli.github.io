@@ -28,8 +28,8 @@ import { LIFT } from '../geo/radii'
 import { smoothstep } from '../lod'
 import { registerDebug } from '../debugHooks'
 import { GLYPH_PATHS } from './glyphPaths'
-import { GLYPH_BOX_PX, glyphBoxes, monumentBoxes } from '../instrument/screenObstacles'
-import { CameraContext, groundM, isCoarsePointer, landmarkInfos, monumentShown } from './landmarkFrame'
+import { GLYPH_BOX_PX, glyphBoxes, glyphPlaces, monumentBoxes } from '../instrument/screenObstacles'
+import { CameraContext, glyphShiftPx, glyphShown, groundM, isCoarsePointer, landmarkInfos, monumentShown } from './landmarkFrame'
 
 const GLYPH_PX = GLYPH_BOX_PX
 const LIFT_PX = 4
@@ -213,6 +213,8 @@ export function LandmarkGlyphs() {
       p.mesh.visible = false
       p.shown = 0
       glyphBoxes.length = 0
+      glyphPlaces.length = 0
+      glyphShown.fill(0)
       return
     }
     p.mesh.visible = true
@@ -249,6 +251,7 @@ export function LandmarkGlyphs() {
       const order = p.infos.map((_, i) => i).sort((a, b) => p.infos[b].priority - p.infos[a].priority || a - b)
       const boxes: [number, number][] = []
       glyphBoxes.length = 0
+      glyphPlaces.length = 0
       for (const i of order) {
         const info = p.infos[i]
         p.target[i] = 0
@@ -278,7 +281,10 @@ export function LandmarkGlyphs() {
         if (clash) continue
         boxes.push([cx, cy])
         // labels yield to placed glyphs (published for C4's declutter)
-        if (gate > 0.3) glyphBoxes.push(cx, cy)
+        if (gate > 0.3) {
+          glyphBoxes.push(cx, cy)
+          glyphPlaces.push(info.placeIndex)
+        }
         p.target[i] = 1
         p.shift[i * 2] = sx
         p.shift[i * 2 + 1] = 0
@@ -294,6 +300,8 @@ export function LandmarkGlyphs() {
       const a = p.alpha[i]
       p.alpha[i] = reducedMotion ? t : a + Math.max(-step, Math.min(step, t - a))
       if (p.alpha[i] > 0.05) shown++
+      glyphShown[i] = p.alpha[i]
+      glyphShiftPx[i] = p.shift[i * 2]
     }
     p.shown = shown
     p.aAlpha.needsUpdate = true

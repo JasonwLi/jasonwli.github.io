@@ -50,6 +50,7 @@ import {
   writeMember,
 } from './globeText'
 import { Occupancy, addInstrumentObstacles, labelBounds, placeRects, projectLocal, type Clearance, type Rect } from './declutter'
+import { mapLabelRects } from '../instrument/screenObstacles'
 
 type Kind = LabelsFile['labels'][number]['k']
 const WATER = new Set<Kind>(['ocean', 'sea', 'bay', 'strait', 'lake', 'river'])
@@ -206,6 +207,7 @@ export class MapLabelSystem {
 
     if (!inner || show <= 0) {
       for (const e of this.entries) e.target = 0
+      mapLabelRects.length = 0
     } else {
       // view signature: rerun at ≤ 5 Hz when the view moved > 2 % of viewKm or ~2 px
       const sig = [
@@ -329,6 +331,7 @@ export class MapLabelSystem {
     this.occ.reset(vp.w, vp.h)
     addInstrumentObstacles(this.occ, inner, camera)
     for (const r of placeRects) this.occ.addRect(r)
+    mapLabelRects.length = 0
     const rankMax = RANK_MAX[lod.labelTier]
     const f = labelBounds(_bounds)
     const cands: Entry[] = []
@@ -378,6 +381,7 @@ export class MapLabelSystem {
           if (r) sawRect = true
           if (!r || this.occ.hits(r, clear)) continue
           this.occ.addRect(r)
+          mapLabelRects.push(r.x0, r.y0, r.x1, r.y1)
           e.nudge = nudge
           e.capPx = cap
           ok = true

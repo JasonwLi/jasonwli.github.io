@@ -71,6 +71,12 @@ export function routeFadeAt(leg: DrawnLeg, t: number): number {
  */
 export const GLYPH_BOX_PX = 26
 export const glyphBoxes: number[] = []
+/**
+ * Per glyph box (same order as glyphBoxes, one entry per [cx, cy] pair): the landmark's own
+ * place (landmarks.ts near_place as a locations index, -1 none). The active place's town wins
+ * over its own landmark's glyph (towns/Towns.tsx, One Active Place).
+ */
+export const glyphPlaces: number[] = []
 
 /**
  * The 3D monuments drawn this frame (Monuments, wide-view miniatures and close zoom):
@@ -83,8 +89,10 @@ export const monumentBoxes: number[] = []
 
 /**
  * Every 3D monument drawn this frame, the ones dimmed under their hovered / active pin
- * included (same packing as monumentBoxes): the town miniatures yield to all of them
- * (towns/Towns.tsx: the monument wins).
+ * included: packed [x0, y0, x1, y1, place] (CSS px, then the landmark's own place as a
+ * locations index, -1 none). The town miniatures yield to all of them (towns/Towns.tsx:
+ * the monument wins), except that the ACTIVE place's own town wins over its own (dimmed)
+ * monument (One Active Place).
  */
 export const monumentFootprints: number[] = []
 
@@ -100,6 +108,13 @@ export const townBoxes: number[] = []
  * town rather than on it.
  */
 export const townLabelReach: number[] = []
+
+/**
+ * The region / sea names MapLabels placed in its last declutter pass: packed [x0, y0, x1, y1]
+ * CSS px (padded rects). Empty while the names are hidden. The painted cloud wisps keep off
+ * them (life/Life.tsx); the place names' rects are labels/declutter placeRects.
+ */
+export const mapLabelRects: number[] = []
 
 /**
  * The instrument readout's box (T1c overlay, CSS px) while it is shown: region and
