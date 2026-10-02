@@ -103,7 +103,7 @@ export function Trees({ tier, reducedMotion }: { tier: Tier; reducedMotion: bool
       g.setAttribute('iA', iA)
       g.setAttribute('iB', iB)
       g.instanceCount = 0
-      const mat = makeTreeMaterial(shared, TREE_COLOURS[sp])
+      const mat = makeTreeMaterial(shared, TREE_COLOURS[sp], sp === 'broadleaf')
       const mesh = new THREE.Mesh(g, mat)
       mesh.name = `trees:${sp}`
       mesh.frustumCulled = false

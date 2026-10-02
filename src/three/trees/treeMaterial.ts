@@ -12,11 +12,18 @@
  * (look.lightView) as a flat facet term relative to the ground normal, times the soft
  * day ramp on the ground normal, baked base band (aShade), OKLab L capped at the land
  * cap, x (1 - 0.78 dim). No time uniform: no sway, no idle animation.
+ * Season (step 6): the vertex stage reads the terrain's season map at the instance and
+ * evaluates the same terms (shaders/season.glsl.ts), so canopy and ground agree:
+ * broadleaf crowns (uDecid = 1; not jungle) take the place's autumn hue and patch scaled by
+ * the deciduous share, go bare brown-grey in winter, and flush yellow-green in spring;
+ * savanna-tinted crowns (vGrass) brown in the dry season. Conifers and palms stay green.
  */
 import * as THREE from 'three'
 import { look } from '../terrain/look'
 import { hydroGLSL, liftGLSL, type HydroUniforms, type LiftUniforms } from '../rivers/surfaceLift'
 import { TREE_COLOURS } from './palette'
+import { seasonGLSL } from '../terrain/shaders/season.glsl'
+import { seasonUniforms } from '../terrain/season'
 
 export const MAX_KEEPOUTS = 16
 
@@ -27,6 +34,8 @@ in vec4 iA;
 in vec4 iB;
 ${liftGLSL}
 ${hydroGLSL}
+${seasonGLSL}
+uniform float uDecid;
 uniform float uTau;
 uniform float uFade;
 uniform float uSize;
@@ -39,6 +48,8 @@ out float vTrunk;
 out float vGrass;
 out float vVal;
 out float vJungle;
+out vec4 vSeason; // autumn, bare, spring, dry amounts
+out vec3 vAutCol;
 
 void main() {
   float g = uTau / max(iB.z, 1e-6);
@@ -58,11 +69,25 @@ void main() {
   vGrass = jungle > 0.5 ? 0.0 : iA.w;
   vJungle = jungle;
   vVal = iB.w;
+  vSeason = vec4(0.0);
+  vAutCol = vec3(0.0);
   if (s < 1e-7) {
     vPosV = vec3(0.0);
     vUpV = vec3(0.0, 0.0, 1.0);
     gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
     return;
+  }
+  if (uSeasonOn > 0.001) {
+    vec3 m = textureLod(uSeasonMap, seasonUv(d), 0.0).rgb;
+    float dry, wet;
+    vec4 st = seasonTerms(d, m.g, dry, wet);
+    float share = clamp(m.r * 1.3, 0.0, 1.0) * uDecid * (1.0 - jungle);
+    vSeason = uSeasonOn * vec4(
+      uSeasonAmt.x * st.x * (1.0 - st.y) * share * autumnPatch(d),
+      uSeasonAmt.y * st.y * share,
+      uSeasonAmt.z * st.z * st.w * uDecid * (1.0 - jungle),
+      uSeasonAmt.w * dry * vGrass);
+    vAutCol = autumnHue(d);
   }
   vec4 pv0 = modelViewMatrix * vec4(d, 1.0);
   float h = terrainHeightM(d, unitsPerPxAt(pv0));
@@ -106,6 +131,13 @@ in float vTrunk;
 in float vGrass;
 in float vVal;
 in float vJungle;
+in vec4 vSeason;
+in vec3 vAutCol;
+uniform vec3 cSeasonBare;
+uniform vec3 cSeasonSpring;
+uniform vec3 cSeasonDry;
+float tLum(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
+vec3 tHue(vec3 c, vec3 t, float gain) { return t * (tLum(c) / max(tLum(t), 1e-5)) * gain; }
 float oklabL(vec3 c) {
   vec3 lms = vec3(
     dot(c, vec3(0.4122214708, 0.5363325363, 0.0514459929)),
@@ -130,6 +162,10 @@ void main() {
   float day = mix(uDay.x, uDay.y, lu * 0.5 + 0.5);
   float key = clamp(1.0 + uGain * (dot(n, uLightView) - lu), uShadeRange.x, uShadeRange.y);
   vec3 leaf = mix(mix(uCol, uGrassCol, vGrass), uJungleCol, vJungle);
+  leaf = mix(leaf, tHue(leaf, cSeasonSpring, 1.08), vSeason.z);
+  leaf = mix(leaf, tHue(leaf, cSeasonDry, 1.04), vSeason.w);
+  leaf = mix(leaf, tHue(leaf, vAutCol, 1.15), vSeason.x);
+  leaf = mix(leaf, tHue(leaf, cSeasonBare, 1.05), vSeason.y);
   vec3 base = vTrunk > 0.5 ? uTrunkCol : leaf * (1.0 + vVal);
   vec3 col = capLuma(base * vShade * day * key, uCap, uKnee);
   col *= 1.0 - 0.78 * uDim;
@@ -162,16 +198,18 @@ export function makeTreeShared(lift: LiftUniforms, hydro: HydroUniforms): TreeSh
     uKeep: { value: Array.from({ length: MAX_KEEPOUTS }, () => new THREE.Vector4()) },
     uKeepN: { value: 0 },
     uDim: { value: 0 },
+    ...seasonUniforms(), // shared uniform objects (season.ts keeps them bound)
   }
 }
 
-export function makeTreeMaterial(shared: TreeShared, col: readonly [number, number, number]): THREE.ShaderMaterial {
+export function makeTreeMaterial(shared: TreeShared, col: readonly [number, number, number], deciduous = false): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
     glslVersion: THREE.GLSL3,
     vertexShader,
     fragmentShader,
     uniforms: {
       ...shared,
+      uDecid: { value: deciduous ? 1 : 0 },
       uCol: { value: lin(col) },
       uJungleCol: { value: lin(TREE_COLOURS.jungle) },
       uGrassCol: { value: lin(TREE_COLOURS.grass) },

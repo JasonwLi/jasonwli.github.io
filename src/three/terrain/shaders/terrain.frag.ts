@@ -1,6 +1,7 @@
 /**
  * Painted terrain fragment (C2b), MID/HIGH cube path.
  *   col = mix(land, water) * day, land = albedo x detail x relief (+ snow, rivers),
+ *   seasonal re-hue of the albedo (season.glsl, the visitor's date),
  *   then the OKLab L cap (land 0.66, snow 0.86), the climate mix (C3's frozen
  *   climateShade signature) and the section dim. Linear light; ends with the
  *   tonemapping + colorspace chunks (the Canvas is flat).
@@ -14,6 +15,7 @@ import { climateGLSL } from './climate.glsl'
 import { FRAG_OUT, commonGLSL, fragCommonGLSL } from './common.glsl'
 import { detailGLSL } from './detail.glsl'
 import { reliefGLSL } from './relief.glsl'
+import { seasonGLSL } from './season.glsl'
 import { snowGLSL } from './snow.glsl'
 import { waterGLSL } from './water.glsl'
 
@@ -24,6 +26,7 @@ ${fragCommonGLSL}
 ${reliefGLSL}
 ${waterGLSL}
 ${snowGLSL}
+${seasonGLSL}
 ${detailGLSL}
 uniform samplerCube uAlbedo;
 uniform samplerCube uHydro;
@@ -69,6 +72,8 @@ void main() {
   // ---- land
   vec3 alb = texture(uAlbedo, d).rgb;
   if (uHasDetail > 0.5 && uDetailFade > 0.001 && land > 0.0) alb *= detailFactor(d, kmPerPx);
+  // seasonal colour (the visitor's date): before light, so relief, day ramp and the cap apply
+  if (uSeasonOn > 0.001) alb = seasonGround(alb, d, texEq(uSeasonMap, d).rgb); // uniform branch: derivatives stay defined
   // relief-following snow edge only where there is relief (plains keep a clean edge)
   float snow = snowCover(d, hyd.b, lap * smoothstep(0.08, 0.35, slope)) * land;
   vec3 landCol = mix(alb * shadeLand, snowColor(shadeLand), snow);

@@ -5,6 +5,7 @@
  */
 import { Color, DoubleSide, GLSL3, Matrix3, ShaderMaterial, Vector2, Vector3, type IUniform, type Texture } from 'three'
 import { climateUniforms } from '../shaders/climate.glsl'
+import { seasonUniforms } from '../season'
 import { terrainFrag } from '../shaders/terrain.frag'
 import { terrainVert } from '../shaders/terrain.vert'
 import type { TerrainTextures } from '../textures'
@@ -89,6 +90,7 @@ export function createTerrainCubeMaterial(): ShaderMaterial {
     uHasKoppen: { value: 0 },
     uDim: { value: 0 },
     ...climateUniforms(),
+    ...seasonUniforms(),
   }
   const m = new ShaderMaterial({
     name: 'terrain-cube',

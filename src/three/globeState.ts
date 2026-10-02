@@ -154,6 +154,8 @@ export const globeState = {
   /** Köppen group isolated in climate mode: 0..4 = A..E, -1 none (mirrors store.isolateGroup) */
   isolateGroup: -1,
   season: 0, // -1..1, +1 = northern mid-winter; set once from visitor date or ?season=YYYY-MM-DD
+  /** the same date as a phase angle: 2π(dayOfYear − 15)/365.25 (season = cos); seasonal colour reads (cos, sin) */
+  seasonPhase: 0,
   /** last known pointer (client px), updated on pointermove/pointerdown; hit tests re-run every frame */
   pointer: { x: -1, y: -1, inCanvas: false, overUi: false },
   wheelOwner: 'page' as 'page' | 'globe',
@@ -178,17 +180,28 @@ export function emitFrame(dt: number): void {
   for (const cb of frameListeners) cb(dt)
 }
 
-/** Season from ?season=YYYY-MM-DD or today: cos(2π(dayOfYear − 15)/365.25); +1 = northern mid-winter. */
-export function seasonFor(date: Date): number {
+/**
+ * Seasonal phase from a date: 2π(dayOfYear − 15)/365.25 rad (0 = Jan 15, northern
+ * mid-winter; π/2 mid-April; π mid-July; 3π/2 mid-October). Continuous in the day, so the
+ * seasonal colour has no month steps; the southern hemisphere adds π in the shader.
+ */
+export function seasonPhaseFor(date: Date): number {
   const start = Date.UTC(date.getUTCFullYear(), 0, 1)
   const day = Math.floor((date.getTime() - start) / 86400000) + 1
-  return Math.cos((2 * Math.PI * (day - 15)) / 365.25)
+  return (2 * Math.PI * (day - 15)) / 365.25
+}
+
+/** Season from ?season=YYYY-MM-DD or today: cos(2π(dayOfYear − 15)/365.25); +1 = northern mid-winter. */
+export function seasonFor(date: Date): number {
+  return Math.cos(seasonPhaseFor(date))
 }
 
 function initSeason() {
   if (typeof window === 'undefined') return
   const q = new URLSearchParams(window.location.search).get('season')
   const d = q && /^\d{4}-\d{2}-\d{2}$/.test(q) ? new Date(`${q}T12:00:00Z`) : new Date()
-  globeState.season = seasonFor(Number.isNaN(d.getTime()) ? new Date() : d)
+  const date = Number.isNaN(d.getTime()) ? new Date() : d
+  globeState.seasonPhase = seasonPhaseFor(date)
+  globeState.season = Math.cos(globeState.seasonPhase)
 }
 initSeason()

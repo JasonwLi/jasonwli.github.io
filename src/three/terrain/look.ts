@@ -97,6 +97,23 @@ export const look = {
   snowWinterReach: 0.5,
   snowBias: 0,
 
+  /**
+   * Seasonal colour (step 6; shaders/season.glsl.ts, season.ts). The painted land follows
+   * the visitor's date (or ?season=YYYY-MM-DD) like the snow: every target below only
+   * RE-HUES the paint at the paint's own luminance (x a small gain), so the value
+   * structure and the 0.66 land cap hold. Autumn picks one of three warm hues by a static
+   * ~190 km patch noise (EU4 washes, not a uniform tint).
+   */
+  seasonAutumn: ['#964b2c', '#a2782d', '#a7611b'] as [string, string, string], // russet oklch(0.50 0.110 42), ochre (0.60 0.105 78), amber (0.56 0.120 60)
+  seasonBare: '#6e6055', //   oklch(0.50 0.025 60) bare boughs / dormant ground, brown-grey
+  seasonSpring: '#7a9136', // oklch(0.62 0.120 122) fresh yellow-green
+  seasonDry: '#9b8350', //    oklch(0.62 0.075 85) dry-season straw
+  seasonWet: '#627c40', //    oklch(0.55 0.090 128) wet-season savanna green
+  /** strengths: autumn, winter-bare, spring, dry/wet season */
+  seasonAmt: [0.85, 0.75, 0.42, 0.7] as [number, number, number, number],
+  /** the map fades in once loaded (ms) */
+  seasonFadeMs: 500,
+
   /** detail splatting: km per tile (fine, coarse) and per-class strength (order = splat order) */
   detailScaleKm: [20, 90] as [number, number],
   // forest, jungle, grass, farm, steppe, desert, rock, marsh, ice

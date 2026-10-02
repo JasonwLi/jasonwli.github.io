@@ -63,6 +63,12 @@ export const M = {
   forestDeep: '#213625', // oklch(0.31 0.040 150) Huayna Picchu's cloud forest
   rockDeep: '#453b33', //   oklch(0.36 0.020 60)
   plinth: '#3a3128', //     oklch(0.32 0.020 70)  base rim and cast shadow
+  // Machu Picchu at wide-view size (44-48 px): mid-value flanks so the pale ruins dominate and
+  // the mountain never reads as a dark heap on the Andes
+  cloudForest: '#4e6945', // oklch(0.49 0.065 138) Huayna Picchu and the saddle's flanks
+  scrubMid: '#455d3c', //    oklch(0.45 0.060 138) the lower slopes
+  rockMid: '#797064', //     oklch(0.55 0.022 75)  steep rock and the peaks' crowns
+  plinthMid: '#5d5449', //   oklch(0.45 0.020 70)  Machu Picchu's base rim
 } as const
 
 /** Post-light OKLab L cap for monuments (critique: <= 0.70). */

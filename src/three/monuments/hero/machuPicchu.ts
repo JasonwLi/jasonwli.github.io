@@ -7,13 +7,17 @@
  * with Uña Picchu at its shoulder.
  *
  * Miniature legibility (32-48 px on the painted globe): the ruins and terrace walls are
- * pale granite (graniteLight) over a darker saddle and darker terrace treads, so the
- * citadel and the stepped bands read against the mountain; Huayna Picchu and the flanks
- * are a deep cloud-forest green with dark rock, and the patch sits on a thin dark plinth.
+ * pale granite (graniteLight) over mid-green terrace treads, so the citadel and the stepped
+ * bands read against the mountain. Huayna Picchu and the flanks are a MID cloud-forest green
+ * (cloudForest / scrubMid, L 0.45-0.49) with mid rock (rockMid) on a mid-umber rim
+ * (plinthMid), and the flanks fall off quickly: at the wide travel view the deep greens and
+ * the dark plinth read as one dark heap on the Andes (step-6 fix), so the dark mass is kept
+ * small and the pale granite dominates.
  */
 import type { Kit, V3 } from '../kit.ts'
 import { M } from '../palette.ts'
-import { heightfield, latheArc, painted, rng } from './parts.ts'
+import * as THREE from 'three'
+import { gridTris, latheArc, painted, rng } from './parts.ts'
 
 const PY = 0.3 // plateau height
 const PL = 0.035 // plinth height
@@ -42,27 +46,66 @@ function peak(k: Kit, x: number, z: number, r: number, h: number, seed: number, 
   for (let i = 0; i < n; i++) T.push([last + i, last + ((i + 1) % n), V.length - 1])
   painted(k, V, T, (t) => {
     const y = T[t].reduce((s, i) => s + V[i][1], 0) / 3
-    return y > h * 0.7 && t % 3 === 0 ? M.rockDeep : t % 4 === 0 ? M.scrubDark : M.forestDeep
+    return y > h * 0.7 && t % 3 === 0 ? M.rockMid : t % 4 === 0 ? M.scrubMid : M.cloudForest
   })
+}
+
+/**
+ * A heightfield over a rounded (elliptical) footprint: the square grid is mapped onto the
+ * disc (x = u sqrt(1 - v^2/2), z = v sqrt(1 - u^2/2)) so the patch has no square corners
+ * (a square tile read as a dark box at wide-view size), with one skirt ring down to y = 0.
+ */
+function heightDisc(
+  k: Kit, cx: number, cz: number, rx: number, rz: number, n: number,
+  h: (x: number, z: number) => number, colourAt: (y: number, slope: number) => string, skirt: string,
+) {
+  const V: V3[] = []
+  for (let j = 0; j <= n; j++)
+    for (let i = 0; i <= n; i++) {
+      const u = (2 * i) / n - 1, v = (2 * j) / n - 1
+      const x = cx + rx * u * Math.sqrt(1 - (v * v) / 2), z = cz + rz * v * Math.sqrt(1 - (u * u) / 2)
+      V.push([x, h(x, z), z])
+    }
+  const T = gridTris(n + 1, n + 1)
+  const nn = new THREE.Vector3(), e1 = new THREE.Vector3(), e2 = new THREE.Vector3()
+  painted(k, V, T, (t) => {
+    const [a, b, c] = T[t].map((i) => V[i])
+    e1.set(b[0] - a[0], b[1] - a[1], b[2] - a[2])
+    e2.set(c[0] - a[0], c[1] - a[1], c[2] - a[2])
+    nn.crossVectors(e1, e2).normalize()
+    return colourAt((a[1] + b[1] + c[1]) / 3, 1 - Math.abs(nn.y))
+  })
+  const at = (i: number, j: number) => V[j * (n + 1) + i]
+  const ring: V3[] = []
+  for (let i = 0; i < n; i++) ring.push(at(i, 0))
+  for (let j = 0; j < n; j++) ring.push(at(n, j))
+  for (let i = n; i > 0; i--) ring.push(at(i, n))
+  for (let j = n; j > 0; j--) ring.push(at(0, j))
+  ring.push(ring[0])
+  const SV: V3[] = []
+  for (const p of ring) SV.push(p, [p[0], 0, p[2]])
+  const ST: number[][] = []
+  for (let i = 0; i + 1 < ring.length; i++) ST.push([i * 2, i * 2 + 2, i * 2 + 3], [i * 2, i * 2 + 3, i * 2 + 1])
+  k.prim(SV, ST, skirt)
 }
 
 export function machuPicchu(k: Kit) {
   // ---- the saddle: an elliptical plateau, its flanks falling steeply into the gorge ----
   const AX = 0.46, AZ = 0.56, CZ = 0.02
   const rho = (x: number, z: number) => Math.hypot(x / AX, (z - CZ) / AZ)
-  const fall = (r: number) => (r <= 1 ? PY : PY * Math.exp(-(((r - 1) / 0.62) ** 2)))
+  const fall = (r: number) => (r <= 1 ? PY : PY * Math.exp(-(((r - 1) / 0.5) ** 2)))
   // the terraced sector (front-left): the ground there sits just under the stepped bands
   const terraced = (x: number, z: number) => x < 0.05 && z > -0.45 && rho(x, z) > 0.98
   const H = (x: number, z: number) => {
     const r = rho(x, z)
     return Math.max(0, fall(r) - (terraced(x, z) ? 0.03 : 0) + (r > 1.05 ? 0.012 * Math.sin(x * 13 + z * 7) : 0))
   }
-  // a thin dark plinth under the patch, everything else stands on it
-  k.box(-0.025, 0, 0.025, 2.09, PL, 1.69, M.plinth)
+  // a thin mid-umber rim under the rounded patch, everything else stands on it
+  k.prism(-0.03, 0, 0.02, 0.9, 0.88, PL, 20, M.plinthMid)
   k.push(0, PL, 0)
-  heightfield(k, -1.05, 1.0, -0.8, 0.85, 18, 14, H, (_x, y, _z, slope) => (y > PY - 0.005 ? M.terrace : slope > 0.6 ? M.rockDeep : y < 0.08 ? M.scrubDark : M.forestDeep), M.forestDeep)
+  heightDisc(k, -0.03, 0.02, 0.9, 0.84, 16, H, (y, slope) => (y > PY - 0.005 ? M.terrace : slope > 0.6 ? M.rockMid : y < 0.08 ? M.scrubMid : M.cloudForest), M.plinthMid)
   // ---- Huayna Picchu behind, Uña Picchu at its shoulder ----
-  peak(k, 0.16, -0.62, 0.3, 1.0, 7, -0.06)
+  peak(k, 0.16, -0.62, 0.3, 0.9, 7, -0.06)
   peak(k, -0.24, -0.55, 0.19, 0.56, 13)
   // ---- agricultural terraces: bands following the contours down the front-left flank ----
   const steps = 8
