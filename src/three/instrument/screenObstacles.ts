@@ -14,8 +14,55 @@ export interface DrawnRoutePart {
   count: number
 }
 
+/**
+ * Per leg (a great circle from locations[from] to locations[from + 1], first-visit order) the
+ * restraint state RouteLine drew it with this frame: `w` the damped leg weight (0 = not drawn),
+ * `stubMix` 0..1 how far a long leg has shrunk to a stub at each end, `active` whether it touches
+ * the active place (then it is also drawn full-strength as the overlay, stubbed at stubActiveKm).
+ * The ships (ships/Ships.tsx) sail only where routeFadeAt() says the course line is drawn.
+ */
+export interface DrawnLeg {
+  from: number
+  km: number
+  w: number
+  stubMix: number
+  active: boolean
+}
+
 /** emphasis[i]: part i is the active place's legs (full strength) rather than the faint base course */
-export const drawnRoute: { parts: DrawnRoutePart[]; emphasis: boolean[]; mounted: boolean } = { parts: [], emphasis: [], mounted: false }
+export const drawnRoute: {
+  parts: DrawnRoutePart[]
+  emphasis: boolean[]
+  mounted: boolean
+  /** per leg restraint state (RouteLine order: zero-length legs skipped) */
+  legs: DrawnLeg[]
+  /** the route's opacity this frame (anchors.routeOpacity, 0 while hidden) */
+  opacity: number
+  /** the hero draw-on has finished */
+  drawn: boolean
+  stubKm: number
+  stubActiveKm: number
+} = { parts: [], emphasis: [], mounted: false, legs: [], opacity: 0, drawn: false, stubKm: 1200, stubActiveKm: 2400 }
+
+function smooth01(e0: number, e1: number, x: number): number {
+  const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)))
+  return t * t * (3 - 2 * t)
+}
+
+/** The stub factor at leg parameter t (0..1): 1 near the ends, 0 past stubKm from both (RouteLine's rule). */
+export function stubFade(t: number, km: number, stubMix: number, stubKm: number): number {
+  if (stubMix <= 0) return 1
+  const fromEnd = Math.min(t, 1 - t) * km
+  const stub = 1 - smooth01(0.5 * stubKm, stubKm, fromEnd)
+  return 1 + (stub - 1) * stubMix
+}
+
+/** How strongly the course line is drawn at parameter t of a leg (0..1, before the route opacity). */
+export function routeFadeAt(leg: DrawnLeg, t: number): number {
+  let f = leg.w * stubFade(t, leg.km, leg.stubMix, drawnRoute.stubKm)
+  if (leg.active) f = Math.max(f, stubFade(t, leg.km, leg.stubMix, drawnRoute.stubActiveKm))
+  return f
+}
 
 /**
  * Landmark glyph boxes placed by LandmarkGlyphs' last declutter pass (C5 request:

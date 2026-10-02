@@ -46,7 +46,7 @@ import { heightGridReady, sampleHeightM } from '../geo/heightGrid'
 import { globeState } from '../globeState'
 import { registerDebug } from '../debugHooks'
 import { smoothstep } from '../lod'
-import { drawnRoute } from './screenObstacles'
+import { drawnRoute, stubFade } from './screenObstacles'
 import { pinHeightM, pinLiftVersion } from './pinsPx'
 
 const DEG = Math.PI / 180
@@ -363,9 +363,15 @@ export function RouteLine({ reducedMotion }: { reducedMotion: boolean }) {
       { pos: parts.ovDashed.pos, fade: parts.ovDashed.fade, count: 0 },
     ]
     drawnRoute.emphasis = [false, false, true, true]
+    drawnRoute.stubKm = STUB_KM
+    drawnRoute.stubActiveKm = STUB_ACTIVE_KM
+    drawnRoute.legs = parts.route.legs.map((l) => ({ from: l.from, km: l.km, w: 0, stubMix: 0, active: false }))
     return () => {
       drawnRoute.mounted = false
       drawnRoute.parts = []
+      drawnRoute.legs = []
+      drawnRoute.opacity = 0
+      drawnRoute.drawn = false
     }
   }, [parts])
 
@@ -390,6 +396,7 @@ export function RouteLine({ reducedMotion }: { reducedMotion: boolean }) {
     const op = a.routeOpacity
     parts.group.visible = op > 0.005 && g.surfaceReady
     const dp = drawnRoute.parts
+    drawnRoute.opacity = parts.group.visible ? op : 0
     if (!parts.group.visible) {
       for (const p of dp) p.count = 0
       if (state.drawn) return
@@ -477,12 +484,20 @@ export function RouteLine({ reducedMotion }: { reducedMotion: boolean }) {
     }
     let dirtyS = false
     let dirtyD = false
-    for (const leg of route.legs) {
+    const pub = drawnRoute.legs
+    for (let li = 0; li < route.legs.length; li++) {
+      const leg = route.legs[li]
       const touches = ai >= 0 && (leg.from === ai || leg.from + 1 === ai)
       const target = touches || wide >= 0.999 ? 1 : Math.max(wide, onScreen(leg.from) && onScreen(leg.from + 1) ? 1 : 0)
       leg.w = reducedMotion || !state.drawn ? target : leg.w + (target - leg.w) * k
       if (Math.abs(leg.w - target) < 0.002) leg.w = target
       const sm = leg.km > LONG_KM ? stubMix : 0
+      const pl = pub[li]
+      if (pl) {
+        pl.w = leg.w
+        pl.stubMix = sm
+        pl.active = touches
+      }
       if (Math.abs(leg.w - leg.wDrawn) > 0.004 || Math.abs(sm - leg.stubDrawn) > 0.004 || (leg.w !== leg.wDrawn && (leg.w === 0 || leg.w === 1))) {
         leg.wDrawn = leg.w
         leg.stubDrawn = sm
@@ -510,6 +525,8 @@ export function RouteLine({ reducedMotion }: { reducedMotion: boolean }) {
       l.mat.opacity = l.alpha * op * (l.kind === 'base' ? faint : 1)
       if (l.mat.dashed) l.mat.dashScale = pxPerUnit
     }
+
+    drawnRoute.drawn = state.drawn
 
     // ——— publish the drawn segments for the label declutter ———
     if (dp.length === 4 && parts.group.visible) {
@@ -546,17 +563,9 @@ function refreshEnds(route: ReturnType<typeof buildRoute>) {
 
 /** Per-endpoint fade for one leg: weight × (full arc, or a stub at each end by stubMix). */
 function writeLegFade(st: Store, offset: number, leg: Leg, w: number, stubMix: number, stubKm: number) {
-  const s0 = 0.5 * stubKm
   for (let j = 0; j < leg.segs; j++) {
     for (let e = 0; e < 2; e++) {
-      let f = w
-      if (stubMix > 0) {
-        const t = (j + e) / leg.segs
-        const fromEnd = Math.min(t, 1 - t) * leg.km
-        const stub = 1 - smoothstep(s0, stubKm, fromEnd)
-        f *= 1 + (stub - 1) * stubMix
-      }
-      st.fade[(offset + j) * 2 + e] = f
+      st.fade[(offset + j) * 2 + e] = w * stubFade((j + e) / leg.segs, leg.km, stubMix, stubKm)
     }
   }
 }
