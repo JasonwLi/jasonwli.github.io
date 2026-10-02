@@ -82,6 +82,26 @@ export const glyphBoxes: number[] = []
 export const monumentBoxes: number[] = []
 
 /**
+ * Every 3D monument drawn this frame, the ones dimmed under their hovered / active pin
+ * included (same packing as monumentBoxes): the town miniatures yield to all of them
+ * (towns/Towns.tsx: the monument wins).
+ */
+export const monumentFootprints: number[] = []
+
+/**
+ * The town miniatures drawn this frame (towns/Towns.tsx): packed [x0, y0, x1, y1] CSS px
+ * per town. Region and place names keep off them; the ships too.
+ */
+export const townBoxes: number[] = []
+
+/**
+ * Per place (locations order), how far its drawn town reaches right of / left of the pin
+ * in CSS px: [right, left] pairs, 0 without a town. The place's name sets beside its own
+ * town rather than on it.
+ */
+export const townLabelReach: number[] = []
+
+/**
  * The instrument readout's box (T1c overlay, CSS px) while it is shown: region and
  * place names yield to it (at deep zoom it hangs over the paint from the top edge).
  */

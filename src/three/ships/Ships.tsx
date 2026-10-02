@@ -50,7 +50,7 @@ import { registerDebug } from '../debugHooks'
 import { locations } from '../../data/travel'
 import { EARTH_KM } from '../geo/radii'
 import { heightGridReady } from '../geo/heightGrid'
-import { drawnRoute, monumentBoxes, neatGuard, routeFadeAt } from '../instrument/screenObstacles'
+import { drawnRoute, monumentBoxes, neatGuard, routeFadeAt, townBoxes } from '../instrument/screenObstacles'
 import { CameraContext, groundM, isCoarsePointer, isLandDir } from '../monuments/landmarkFrame'
 import { guardThemeColours } from '../monuments/material'
 import { buildCaravel } from './caravel'
@@ -404,6 +404,9 @@ export function Ships({ tier, reducedMotion }: { tier: Tier; reducedMotion: bool
       // off the drawn monuments
       const mb = monumentBoxes
       for (let i = 0; i + 3 < mb.length; i += 4) if (x1 > mb[i] - 2 && x0 < mb[i + 2] + 2 && y1 > mb[i + 1] - 2 && y0 < mb[i + 3] + 2) return false
+      // off the town miniatures (a coastal town)
+      const tb = townBoxes
+      for (let i = 0; i + 3 < tb.length; i += 4) if (x1 > tb[i] - 2 && x0 < tb[i + 2] + 2 && y1 > tb[i + 1] - 2 && y0 < tb[i + 3] + 2) return false
       // off the visible pins (a pin and a gap)
       for (let i = 0; i + 3 < pinsPx.length; i += 4) {
         if (pinsPx[i + 2] < 0.35 || i >> 2 === skipPin) continue

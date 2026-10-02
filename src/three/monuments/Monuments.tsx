@@ -61,7 +61,7 @@ import type { Tier } from '../globeState'
 import { globeState } from '../globeState'
 import { sceneRefs } from '../sceneRefs'
 import { registerDebug } from '../debugHooks'
-import { monumentBoxes, neatGuard } from '../instrument/screenObstacles'
+import { monumentBoxes, monumentFootprints, neatGuard } from '../instrument/screenObstacles'
 import { buildArchetype } from './archetypes'
 import { attachInstanceAttributes, guardThemeColours, makeMonumentMaterial } from './material'
 import { locations } from '../../data/travel'
@@ -423,6 +423,7 @@ export function Monuments({ tier }: { tier: Tier }) {
       }
       parts.material.dispose()
       monumentBoxes.length = 0
+      monumentFootprints.length = 0
     },
     [parts],
   )
@@ -474,6 +475,7 @@ export function Monuments({ tier }: { tier: Tier }) {
       for (const m of meshes) m.mesh.visible = false
       monumentShown.fill(0)
       monumentBoxes.length = 0
+      monumentFootprints.length = 0
       for (const a of anim) a.vis = 0
       stats.visible = 0
       stats.meshes = 0
@@ -778,6 +780,7 @@ export function Monuments({ tier }: { tier: Tier }) {
     // pass 2: instance matrices + the drawn footprints (label / glyph obstacles)
     for (const rec of meshes) rec.mesh.count = 0
     monumentBoxes.length = 0
+    monumentFootprints.length = 0
     let visible = 0
     let tris = 0
     const { base, U2, F2, Xr, Zr, p, m } = tmp
@@ -847,11 +850,15 @@ export function Monuments({ tier }: { tier: Tier }) {
       if (!s.part) visible++
       tris += rec.tris
       // footprint: base and top projected, widened by half the form's width (+2 px)
-      if (vis > 0.3 && anim[i].dim < 0.5 && ctx.project(p, scr)) {
+      // (all drawn forms go to monumentFootprints, the towns' obstacles; the dimmed ones stay out of monumentBoxes)
+      if (vis > 0.3 && ctx.project(p, scr)) {
         top.copy(p).addScaledVector(U2, s.height * kk)
         if (ctx.project(top, scr2)) {
           const hw = s.width * kk * f.ppu * 0.5 + 2
-          monumentBoxes.push(Math.min(scr[0], scr2[0]) - hw, Math.min(scr[1], scr2[1]) - 2, Math.max(scr[0], scr2[0]) + hw, Math.max(scr[1], scr2[1]) + 3)
+          const x0 = Math.min(scr[0], scr2[0]) - hw, y0 = Math.min(scr[1], scr2[1]) - 2
+          const x1 = Math.max(scr[0], scr2[0]) + hw, y1 = Math.max(scr[1], scr2[1]) + 3
+          monumentFootprints.push(x0, y0, x1, y1)
+          if (anim[i].dim < 0.5) monumentBoxes.push(x0, y0, x1, y1)
         }
       }
     }

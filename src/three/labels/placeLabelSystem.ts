@@ -18,6 +18,7 @@ import { globeState } from '../globeState'
 import { sceneRefs } from '../sceneRefs'
 import { VIEW_GATES } from '../lod'
 import { pinLocal } from '../instrument/pinsPx'
+import { townLabelReach } from '../instrument/screenObstacles'
 import { locations } from '../../data/travel'
 import { tokens } from '../../theme/tokens'
 import { CAP_HEIGHT_EM, FONT_ITALIC, GlobeBatchedText, makeMember, sanitize, smoothstep, writeMember } from './globeText'
@@ -191,7 +192,9 @@ export class PlaceLabelSystem {
       const sides: (1 | -1)[] = e.side > 0 ? [1, -1] : [-1, 1]
       let ok = false
       for (const side of sides) {
-        const x0 = side > 0 ? x + OFF_X : x - OFF_X - w
+        // beside the place's own town miniature when one is drawn (its box is an obstacle)
+        const off = Math.max(OFF_X, (townLabelReach[i * 2 + (side > 0 ? 0 : 1)] ?? 0) + 3)
+        const x0 = side > 0 ? x + off : x - off - w
         const r = { x0: x0 - 1, y0: cy - capPx / 2 - 3, x1: x0 + w + 1, y1: cy + capPx / 2 + 4 }
         const f = labelBounds(_bounds)
         if (r.x0 < f.x0 + 4 || r.y0 < f.y0 + 4 || r.x1 > f.x1 - 4 || r.y1 > f.y1 - 4) continue

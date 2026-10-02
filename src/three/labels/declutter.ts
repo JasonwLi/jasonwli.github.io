@@ -13,7 +13,7 @@
  */
 import * as THREE from 'three'
 import { globeState } from '../globeState'
-import { GLYPH_BOX_PX, drawnRoute, glyphBoxes, monumentBoxes, neatGuard, readoutBox } from '../instrument/screenObstacles'
+import { GLYPH_BOX_PX, drawnRoute, glyphBoxes, monumentBoxes, neatGuard, readoutBox, townBoxes } from '../instrument/screenObstacles'
 import { instrumentLayout } from '../instrument/anchors'
 
 /** route segments fainter than this at both ends are not obstacles */
@@ -245,6 +245,10 @@ export function addInstrumentObstacles(occ: Occupancy, inner: THREE.Object3D, ca
   // the 3D monuments as drawn (wide-view miniatures and close zoom): names keep off them
   for (let i = 0; i + 3 < monumentBoxes.length; i += 4) {
     occ.addRect({ x0: monumentBoxes[i], y0: monumentBoxes[i + 1], x1: monumentBoxes[i + 2], y1: monumentBoxes[i + 3] })
+  }
+  // the town miniatures at the places (a place's own name sets beside its town: placeLabelSystem)
+  for (let i = 0; i + 3 < townBoxes.length; i += 4) {
+    occ.addRect({ x0: townBoxes[i], y0: townBoxes[i + 1], x1: townBoxes[i + 2], y1: townBoxes[i + 3] })
   }
   // the neatline's scale numerals (deep zoom)
   if (neatGuard.on) {
